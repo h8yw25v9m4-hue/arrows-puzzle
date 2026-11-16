@@ -93,6 +93,29 @@ footer{color:#627995;letter-spacing:.2px}
 @keyframes nextPulse{0%,100%{box-shadow:0 5px 22px #65caff33}50%{box-shadow:0 5px 30px #65caff77,0 0 0 4px #65caff12}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
+
+/* Version 15: restrained, high-contrast board and responsive controls */
+:root{color-scheme:dark;--bg:#0b1220;--panel:#111c2d;--tile:#142238;--line:#263950;--text:#e8eef7;--muted:#91a2b8;--accent:#78b9e8;--bad:#e47d83;--good:#7bc9a8}
+body{background:linear-gradient(160deg,#101b2b 0%,#0b1220 58%,#0a111d 100%);color:var(--text)}
+main{max-width:560px}
+.board-wrap{max-width:500px}
+.board{gap:2px;background:#0b1422;border:1px solid #263950;border-radius:16px;padding:7px;overflow:hidden;box-shadow:0 18px 44px #0004,inset 0 1px #ffffff08}
+.cell{border-radius:4px;background:#142238;border-color:#263950}
+.cell.empty{background:linear-gradient(145deg,#111e30,#142238);border-color:#1c3048;box-shadow:inset 0 1px 1px #ffffff05}
+.arrow-shape{stroke:url(#arrowGradient);stroke-width:40;filter:drop-shadow(0 1px 1px #0008)}
+.arrow-head{fill:url(#headGradient);stroke:#d7eaff;stroke-width:1;filter:drop-shadow(0 1px 1px #0008)}
+.arrow-hit{touch-action:manipulation}
+.board.is-animating .arrow-hit{pointer-events:none}
+.arrow-flight{filter:drop-shadow(0 2px 4px #68b5e866)}
+.progress{background:#1b2b40}
+.progress>div{background:#78b9e8;transition:width .16s linear}
+.btn{border:1px solid #2b4059;border-radius:11px;background:#142238;color:#e8eef7;transition:background .12s,border-color .12s}
+.btn.primary{background:#78b9e8;color:#0b1726;border-color:#78b9e8}
+.btn:active{filter:brightness(1.08)}
+.message{color:#a7b8cc}
+.help{background:#101c2d;border-color:#263950}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
 </style>
 </head>
 <body><main>
@@ -240,52 +263,108 @@ footer{color:#627995;letter-spacing:.2px}
  }
  async function move(a){
    if(won||failed||animating||!a.alive)return;
-   if(isBlocked(a)){hearts--;say('Blocked: another arrow occupies the exit path. Clear that arrow first.');if(hearts<=0){failed=true;say('Out of hearts. Restart the level to try again.')}render();return}
-   animating=true;
+
+   const blocker=isBlocked(a);
+   if(blocker){
+     hearts=Math.max(0,hearts-1);
+     say(hearts===0?'Out of hearts. Restart the level to try again.':'Blocked. Clear the arrow in front first.');
+     if(hearts===0)failed=true;
+     render();
+     return;
+   }
+
    const board=$('board'),svg=board.querySelector('svg'),ns='http://www.w3.org/2000/svg';
-   const originalLine=svg.querySelector(`.arrow-shape[data-arrow-id="${a.id}"]`);
-   const originalHead=svg.querySelector(`.arrow-head[data-arrow-id="${a.id}"]`);
-   if(!originalLine||!originalHead){animating=false;return}
-   const group=document.createElementNS(ns,'g');group.setAttribute('class','arrow-flight');
-   const line=originalLine.cloneNode(true),head=originalHead.cloneNode(true);
-   line.removeAttribute('data-arrow-id');head.removeAttribute('data-arrow-id');
-   group.append(line,head);svg.appendChild(group);
-   originalLine.style.opacity='0';originalHead.style.opacity='0';
+   const originalLine=svg?.querySelector(`.arrow-shape[data-arrow-id="${a.id}"]`);
+   const originalHead=svg?.querySelector(`.arrow-head[data-arrow-id="${a.id}"]`);
+   if(!originalLine||!originalHead){
+     say('Arrow could not be selected. Try again.');
+     return;
+   }
 
-   // Cells are stored tail-to-head. Keep one cell-pitch of distance between
-   // successive body samples so the complete tail trails the moving head
-   // through the exact same bends without collapsing toward the tail.
-   const route=a.cells.map(([r,c])=>[50+c*100,50+r*100]);
-   const [dr,dc]=dirs[a.d],headPoint=route[route.length-1];
-   const exitSteps=(dc>0?N-a.c:dc<0?a.c+1:dr>0?N-a.r:a.r+1)+a.cells.length+2;
-   for(let i=1;i<=exitSteps;i++)route.push([headPoint[0]+dc*100*i,headPoint[1]+dr*100*i]);
+   // Lock input before starting any visual work. The board state and progress
+   // remain unchanged until the complete animation succeeds.
+   animating=true;
+   board.classList.add('is-animating');
+   let group=null,completed=false;
+   try{
+     group=document.createElementNS(ns,'g');
+     group.setAttribute('class','arrow-flight');
+     const line=originalLine.cloneNode(true),head=originalHead.cloneNode(true);
+     line.removeAttribute('data-arrow-id');
+     head.removeAttribute('data-arrow-id');
+     group.append(line,head);
+     svg.appendChild(group);
+     originalLine.style.opacity='0';
+     originalHead.style.opacity='0';
 
-   const count=a.cells.length,bodyLength=(count-1)*100;
-   const duration=Math.min(2600,1000+(exitSteps+count)*35),started=performance.now();
-   say('Arrow following its path…');
-   await new Promise(resolve=>{
-     function frame(now){
-       const t=Math.min(1,(now-started)/duration);
-       const distance=t*(exitSteps+count+1)*100;
-       const pts=[];
-       for(let i=0;i<count;i++)pts.push(samplePolyline(route,i*100+distance));
-       const tip=samplePolyline(route,bodyLength+distance);
-
-       // Match the original rendering: end the shaft slightly before the
-       // tip, toward the preceding body segment, so it meets the arrowhead.
-       if(pts.length>1){
-         const prev=pts[pts.length-2],last=pts[pts.length-1];
-         pts[pts.length-1]=[last[0]+(prev[0]-last[0])*.34,last[1]+(prev[1]-last[1])*.34];
-       }
-       line.setAttribute('d',pts.map(([x,y],i)=>(i?'L ':'M ')+x+' '+y).join(' '));
-       head.setAttribute('points',polygonForHead(tip[0],tip[1],a.d).map(p=>p.join(',')).join(' '));
-       if(t<1)requestAnimationFrame(frame);else resolve();
+     // Preserve the arrow's complete shape: sample each body point at a
+     // fixed 100-unit interval behind the moving head along its route.
+     const route=a.cells.map(([r,c])=>[50+c*100,50+r*100]);
+     const [dr,dc]=dirs[a.d];
+     const [hr,hc]=a.cells[a.cells.length-1];
+     const headPoint=route[route.length-1];
+     const exitSteps=(dc>0?N-hc:dc<0?hc+1:dr>0?N-hr:hr+1)+2;
+     for(let i=1;i<=exitSteps;i++){
+       route.push([headPoint[0]+dc*100*i,headPoint[1]+dr*100*i]);
      }
-     requestAnimationFrame(frame);
-   });
-   sparkleBurst(a.d);a.alive=false;animating=false;
-   if(!arrows.some(x=>x.alive)){won=true;say('Level complete. All arrows escaped.');levelCelebration();level++;localStorage.setItem('arrows-level',String(level));$('next').style.display='block'}
-   else say('Arrow cleared. Find the next open path.');
+
+     const bodyLength=(a.cells.length-1)*100;
+     const travel=bodyLength+exitSteps*100;
+     const duration=Math.max(650,Math.min(1700,travel*1.05));
+     const started=performance.now();
+     say('Clearing arrow…');
+
+     await new Promise((resolve,reject)=>{
+       let frameId=0;
+       const tick=now=>{
+         try{
+           const t=Math.min(1,(now-started)/duration);
+           // Ease very slightly, without the slow start that makes taps feel laggy.
+           const eased=1-Math.pow(1-t,1.15);
+           const distance=eased*travel;
+           const pts=[];
+           for(let i=0;i<a.cells.length;i++){
+             pts.push(samplePolyline(route,distance+i*100));
+           }
+           const tip=samplePolyline(route,distance+bodyLength);
+           if(pts.length>1){
+             const prev=pts[pts.length-2],last=pts[pts.length-1];
+             pts[pts.length-1]=[last[0]+(prev[0]-last[0])*.34,last[1]+(prev[1]-last[1])*.34];
+           }
+           line.setAttribute('d',pts.map(([x,y],i)=>(i?'L ':'M ')+x+' '+y).join(' '));
+           head.setAttribute('points',polygonForHead(tip[0],tip[1],a.d).map(p=>p.join(',')).join(' '));
+           if(t<1)frameId=requestAnimationFrame(tick);
+           else resolve();
+         }catch(error){cancelAnimationFrame(frameId);reject(error)}
+       };
+       frameId=requestAnimationFrame(tick);
+     });
+
+     completed=true;
+   }catch(error){
+     console.error('Arrow animation failed:',error);
+     say('Animation interrupted. The arrow has not been cleared; try again.');
+   }finally{
+     if(group)group.remove();
+     originalLine.style.opacity='';
+     originalHead.style.opacity='';
+     board.classList.remove('is-animating');
+     animating=false;
+   }
+
+   // Commit exactly once, and only after the arrow has visibly exited.
+   if(!completed)return;
+   a.alive=false;
+   if(!arrows.some(x=>x.alive)){
+     won=true;
+     say('Level complete. All arrows escaped.');
+     levelCelebration();
+     level++;
+     localStorage.setItem('arrows-level',String(level));
+     $('next').style.display='block';
+   }else{
+     say('Arrow cleared. Find the next open path.');
+   }
    render();
  }
  function sparkleBurst(direction){
