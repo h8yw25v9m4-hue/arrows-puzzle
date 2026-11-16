@@ -206,12 +206,20 @@ footer{color:#627995;letter-spacing:.2px}
    }
  }
  function isBlocked(a){
+   // The only blocking cells are those on the straight exit ray in front
+   // of the visible arrowhead. Ignore this exact arrow object and all
+   // arrows already removed from play.
    const [dr,dc]=dirs[a.d];
-   // The arrow exits straight ahead from its head; its body follows the bends.
-   for(let r=a.r+dr,c=a.c+dc;r>=0&&r<N&&c>=0&&c<N;r+=dr,c+=dc){
-     if(arrows.some(b=>b.alive&&b.id!==a.id&&b.cells.some(([br,bc])=>br===r&&bc===c)))return true;
+   const [hr,hc]=a.cells[a.cells.length-1] || [a.r,a.c];
+   const occupied=new Map();
+   for(const other of arrows){
+     if(other===a || !other.alive)continue;
+     for(const [r,c] of other.cells)occupied.set(r+','+c,other);
    }
-   return false;
+   for(let r=hr+dr,c=hc+dc;r>=0&&r<N&&c>=0&&c<N;r+=dr,c+=dc){
+     if(occupied.has(r+','+c))return occupied.get(r+','+c);
+   }
+   return null;
  }
  function samplePolyline(points,distance){
    if(distance<=0)return points[0];
@@ -232,7 +240,7 @@ footer{color:#627995;letter-spacing:.2px}
  }
  async function move(a){
    if(won||failed||animating||!a.alive)return;
-   if(isBlocked(a)){hearts--;say('Blocked. Clear the arrow ahead first.');if(hearts<=0){failed=true;say('Out of hearts. Restart the level to try again.')}render();return}
+   if(isBlocked(a)){hearts--;say('Blocked: another arrow occupies the exit path. Clear that arrow first.');if(hearts<=0){failed=true;say('Out of hearts. Restart the level to try again.')}render();return}
    animating=true;
    const board=$('board'),svg=board.querySelector('svg'),ns='http://www.w3.org/2000/svg';
    const originalLine=svg.querySelector(`.arrow-shape[data-arrow-id="${a.id}"]`);
@@ -243,21 +251,33 @@ footer{color:#627995;letter-spacing:.2px}
    line.removeAttribute('data-arrow-id');head.removeAttribute('data-arrow-id');
    group.append(line,head);svg.appendChild(group);
    originalLine.style.opacity='0';originalHead.style.opacity='0';
-   // The polyline is ordered tail-to-head. Each segment advances along it,
-   // so the whole arrow snakes through every existing bend before exiting.
+
+   // Cells are stored tail-to-head. Keep one cell-pitch of distance between
+   // successive body samples so the complete tail trails the moving head
+   // through the exact same bends without collapsing toward the tail.
    const route=a.cells.map(([r,c])=>[50+c*100,50+r*100]);
    const [dr,dc]=dirs[a.d],headPoint=route[route.length-1];
    const exitSteps=(dc>0?N-a.c:dc<0?a.c+1:dr>0?N-a.r:a.r+1)+a.cells.length+2;
    for(let i=1;i<=exitSteps;i++)route.push([headPoint[0]+dc*100*i,headPoint[1]+dr*100*i]);
-   const count=a.cells.length,duration=Math.min(2100,850+count*48),started=performance.now();
+
+   const count=a.cells.length,bodyLength=(count-1)*100;
+   const duration=Math.min(2600,1000+(exitSteps+count)*35),started=performance.now();
    say('Arrow following its path…');
    await new Promise(resolve=>{
      function frame(now){
-       const t=Math.min(1,(now-started)/duration),distance=t*(exitSteps+count+1)*100;
+       const t=Math.min(1,(now-started)/duration);
+       const distance=t*(exitSteps+count+1)*100;
        const pts=[];
-       for(let i=0;i<count;i++)pts.push(samplePolyline(route,i+distance));
+       for(let i=0;i<count;i++)pts.push(samplePolyline(route,i*100+distance));
+       const tip=samplePolyline(route,bodyLength+distance);
+
+       // Match the original rendering: end the shaft slightly before the
+       // tip, toward the preceding body segment, so it meets the arrowhead.
+       if(pts.length>1){
+         const prev=pts[pts.length-2],last=pts[pts.length-1];
+         pts[pts.length-1]=[last[0]+(prev[0]-last[0])*.34,last[1]+(prev[1]-last[1])*.34];
+       }
        line.setAttribute('d',pts.map(([x,y],i)=>(i?'L ':'M ')+x+' '+y).join(' '));
-       const tip=samplePolyline(route,count-1+distance);
        head.setAttribute('points',polygonForHead(tip[0],tip[1],a.d).map(p=>p.join(',')).join(' '));
        if(t<1)requestAnimationFrame(frame);else resolve();
      }
