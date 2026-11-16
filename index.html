@@ -25,7 +25,7 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 .cell.occupied{background:#202d40;border-color:#344760;cursor:pointer}
 .cell.occupied:active{background:#2b3d55}
 .arrow-layer{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:visible}
-.arrow-shape{fill:none;stroke:#a9d4ff;stroke-width:0.66;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1px 2px #0008)}
+.arrow-shape{fill:none;stroke:#a9d4ff;stroke-width:56;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1px 2px #0008)}
 .arrow-head{fill:#d9edff;stroke:#8fc7ff;stroke-width:.04;stroke-linejoin:round;filter:drop-shadow(0 1px 2px #0008)}
 .arrow-hit{position:absolute;z-index:3;background:transparent;border:0;padding:0;cursor:pointer;touch-action:manipulation}
 .arrow-hit:focus-visible{outline:2px solid #fff;outline-offset:-3px;border-radius:8px}
@@ -105,14 +105,14 @@ footer{text-align:center;color:#77859b;font-size:10px;margin-top:15px}
    const svgNS='http://www.w3.org/2000/svg',svg=document.createElementNS(svgNS,'svg');
    svg.setAttribute('class','arrow-layer');svg.setAttribute('viewBox','0 0 800 800');svg.setAttribute('preserveAspectRatio','none');
    board.appendChild(svg);
-   const centers=(r,c)=>[c*(100+gap/rect.width*800)+50,r*(100+gap/rect.width*800)+50];
+   const centers=(r,c)=>[50+c*100,50+r*100];
    for(const a of arrows)if(a.alive){
      const [dr,dc]=dirs[a.d],head=[a.r,a.c],tail=a.cells[a.cells.length-1];
      const [hx,hy]=centers(head[0],head[1]),[tx,ty]=centers(tail[0],tail[1]);
      const dx=dc*34,dy=dr*34;
      const line=document.createElementNS(svgNS,'path');
      line.setAttribute('d',`M ${tx} ${ty} L ${hx} ${hy}`);
-     line.setAttribute('class','arrow-shape');line.setAttribute('stroke-width','57');
+     line.setAttribute('class','arrow-shape');line.setAttribute('stroke-width','56');
      svg.appendChild(line);
      const tip=document.createElementNS(svgNS,'polygon');
      let pts;
