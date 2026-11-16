@@ -69,7 +69,7 @@ header>div:last-child{width:42px;height:42px;border-radius:14px;display:grid;pla
 .cell{border-radius:4px;border-color:rgba(113,145,184,.12);background:linear-gradient(145deg,rgba(23,38,60,.88),rgba(13,25,43,.96))}
 .cell.empty{background:linear-gradient(145deg,rgba(17,29,48,.78),rgba(20,34,54,.9));border-color:rgba(121,158,200,.11);box-shadow:inset 0 1px 2px #0005}
 .arrow-layer{overflow:visible}
-.arrow-shape{stroke:url(#arrowGradient);stroke-width:48;filter:url(#arrowGlow)}
+.arrow-shape{stroke:url(#arrowGradient);stroke-width:42;filter:url(#arrowGlow)}
 .arrow-head{fill:url(#headGradient);stroke:#d8f5ff;stroke-width:1.2;filter:url(#arrowGlow)}
 .arrow-hit:focus-visible{outline:2px solid #c4efff;outline-offset:-4px;box-shadow:0 0 0 4px #79caff33}
 .arrow-hit:active{background:#c7edff20}
@@ -114,60 +114,50 @@ footer{color:#627995;letter-spacing:.2px}
  let level=Math.max(0,Number(localStorage.getItem('arrows-level')||0)),hearts=3,arrows=[],won=false,failed=false,animating=false;
  function rng(seed){let x=seed>>>0;return()=>{x=(x+0x6D2B79F5)>>>0;let t=x;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
  function buildPuzzle(lv){
+   // Dense, solvable packing: each newly placed arrow has a clear exit ray
+   // through all earlier pieces. Later pieces may block it, so removing in
+   // reverse placement order always provides a valid solution.
    const rand=rng(982451653+lv*7919), occupied=new Set(), placed=[];
-   const dirsList=['↑','↓','←','→'], candidates=[];
-   // Build each arrow from its head backwards. Some paths deliberately turn at
-   // right angles, while the final segment always points in the exit direction.
-   for(let len=4;len<=10;len++)for(const d of dirsList){
-     const [dr,dc]=dirs[d];
-     for(let r=0;r<N;r++)for(let c=0;c<N;c++){
-       for(let variant=0;variant<2;variant++){
-         const rev=[[r,c]];
-         let rr=r,cc=c,stepR=-dr,stepC=-dc,turns=0;
-         const bendAt=variant===1?2+Math.floor(rand()*(len-2)):-1;
-         let valid=true;
-         for(let k=1;k<len;k++){
-           if(k===bendAt&&turns===0){
-             if(stepR!==0){stepR=0;stepC=rand()<.5?-1:1;}
-             else{stepC=0;stepR=rand()<.5?-1:1;}
-             turns++;
-           }else if(variant===1&&turns===0&&k>1&&rand()<.24){
-             if(stepR!==0){stepR=0;stepC=rand()<.5?-1:1;}
-             else{stepC=0;stepR=rand()<.5?-1:1;}
-             turns++;
-           }
-           rr+=stepR;cc+=stepC;
-           if(rr<0||rr>=N||cc<0||cc>=N){valid=false;break}
-           if(rev.some(([pr,pc])=>pr===rr&&pc===cc)){valid=false;break}
-           rev.push([rr,cc]);
-         }
-         if(valid)candidates.push({r,c,d,cells:rev.reverse(),bent:turns>0});
+   const directions=['↑','↓','←','→'];
+   const targetCells=Math.min(320,285+Math.floor(lv*2));
+   const maxPieces=72;
+   const key=(r,c)=>r+','+c;
+   let attempts=0;
+   while(occupied.size<targetCells && placed.length<maxPieces && attempts<18000){
+     attempts++;
+     const d=directions[Math.floor(rand()*4)], [dr,dc]=dirs[d];
+     const hr=Math.floor(rand()*N), hc=Math.floor(rand()*N);
+     // A valid arrowhead must have a clear straight exit to the board edge.
+     let exitClear=true;
+     for(let r=hr+dr,c=hc+dc;r>=0&&r<N&&c>=0&&c<N;r+=dr,c+=dc){
+       if(occupied.has(key(r,c))){exitClear=false;break}
+     }
+     if(!exitClear||occupied.has(key(hr,hc)))continue;
+     const len=4+Math.floor(rand()*7); // every arrow has a real tail
+     const cells=[[hr,hc]];
+     let r=hr,c=hc,vr=-dr,vc=-dc;
+     const shouldBend=rand()<.72;
+     const bendAt=2+Math.floor(rand()*Math.max(1,len-2));
+     let bent=false,valid=true;
+     for(let i=1;i<len;i++){
+       if(shouldBend&&!bent&&i>=bendAt){
+         if(vr!==0){vr=0;vc=rand()<.5?-1:1}
+         else{vc=0;vr=rand()<.5?-1:1}
+         bent=true;
        }
+       r+=vr;c+=vc;
+       if(r<0||r>=N||c<0||c>=N||occupied.has(key(r,c))||cells.some(([rr,cc])=>rr===r&&cc===c)){valid=false;break}
+       cells.push([r,c]);
      }
-   }
-   for(let i=candidates.length-1;i>0;i--){const j=Math.floor(rand()*(i+1));[candidates[i],candidates[j]]=[candidates[j],candidates[i]]}
-   const maxPieces=Math.min(42,30+Math.floor(lv/2)),targetCells=Math.min(210,155+Math.floor(lv*1.5));
-   for(const p of candidates){
-     if(placed.length>=maxPieces||occupied.size>=targetCells)break;
-     if(p.cells.some(([r,c])=>occupied.has(r+','+c)))continue;
-     const [dr,dc]=dirs[p.d];
-     let clear=true;
-     for(let r=p.r+dr,c=p.c+dc;r>=0&&r<N&&c>=0&&c<N;r+=dr,c+=dc){
-       if(occupied.has(r+','+c)){clear=false;break}
-     }
-     if(!clear)continue;
-     const a={id:placed.length,r:p.r,c:p.c,d:p.d,cells:p.cells,alive:true,bent:p.bent};
-     placed.push(a);p.cells.forEach(([r,c])=>occupied.add(r+','+c));
+     if(!valid)continue;
+     // Keep the arrowhead at the exit end; render path from tail to head.
+     const a={id:placed.length,r:hr,c:hc,d,cells:cells.slice().reverse(),alive:true,bent};
+     placed.push(a);cells.forEach(([rr,cc])=>occupied.add(key(rr,cc)));
    }
    return placed;
  }
  function say(t){$('message').textContent=t}
- function createLevel(){arrows=buildPuzzle(level);hearts=3;won=false;failed=false;animating=false;$('next').style.display='none';$('hint').disabled=false;say('Find an arrow with a clear route to the edge.');render()}
- function isBlocked(a){
-   const [dr,dc]=dirs[a.d];
-   return arrows.some(b=>b.alive&&b.id!==a.id&&b.cells.some(([r,c])=>
-     (dr===0&&r===a.r&&(c-a.c)*dc>0)||(dc===0&&c===a.c&&(r-a.r)*dr>0)));
- }
+ function createLevel(){arrows=buildPuzzle(level);hearts=3;won=false;failed=false;animating=false;$('next').style.display='none';$('hint').disabled=false;say('Dense 20 × 20 board. Follow each arrow through its bends to the exit.');render()}
  function render(){
    $('level').textContent=level+1;const remaining=arrows.filter(a=>a.alive).length;
    $('left').textContent=remaining;$('hearts').textContent='♥ '.repeat(hearts).trim()+'♡ '.repeat(3-hearts);
@@ -195,7 +185,7 @@ footer{color:#627995;letter-spacing:.2px}
      points[points.length-1]=[headBaseX,headBaseY];
      const line=document.createElementNS(svgNS,'path');
      line.setAttribute('d',points.map(([x,y],i)=>(i===0?'M ':'L ')+x+' '+y).join(' '));
-     line.setAttribute('class','arrow-shape');line.dataset.arrowId=a.id;line.setAttribute('stroke-width','48');
+     line.setAttribute('class','arrow-shape');line.dataset.arrowId=a.id;line.setAttribute('stroke-width','42');
      svg.appendChild(line);
      const tip=document.createElementNS(svgNS,'polygon');
      let pts;
