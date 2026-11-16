@@ -18,14 +18,19 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 .progress{height:5px;background:#29364a;border-radius:5px;overflow:hidden;margin-bottom:15px}.progress>div{height:100%;background:var(--accent);width:0;transition:width .2s}
 .instruction{text-align:center;color:var(--muted);font-size:13px;margin:0 0 12px}
 .board-wrap{width:100%;max-width:470px;margin:0 auto}.board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;width:100%;aspect-ratio:1;container-type:inline-size}
-.cell{appearance:none;border:1px solid #35445c;border-radius:7px;background:#182335;min-width:0;min-height:0;width:100%;height:100%;padding:0;display:grid;place-items:center;position:relative;overflow:visible;touch-action:manipulation;transition:transform .55s cubic-bezier(.2,.75,.25,1),opacity .48s ease,background .15s}
-.cell.empty{background:#1b2739;border-color:#2d3a50;box-shadow:inset 0 1px 0 #ffffff08}
-.cell.segment{background:#385779;border-color:#6b9bc7;box-shadow:inset 0 1px 0 #ffffff20;cursor:pointer}
-.cell.segment:active{filter:brightness(1.2)}
-.cell.segment .glyph{font-size:clamp(15px,4.6vw,25px);line-height:1;font-weight:900;color:#f5f9ff;pointer-events:none}
-.cell.segment .glyph.body{font-size:clamp(19px,5vw,27px);color:#d9eaff}
-.cell.segment.moving{z-index:5;opacity:0.15}
-.cell.empty:disabled{cursor:default}
+.board-wrap{width:100%;max-width:470px;margin:0 auto}
+.board{position:relative;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;width:100%;aspect-ratio:1;isolation:isolate}
+.cell{appearance:none;border:1px solid #303b4e;border-radius:8px;background:#1a2434;min-width:0;min-height:0;width:100%;height:100%;padding:0;position:relative;z-index:1;touch-action:manipulation;transition:background .15s,border-color .15s}
+.cell.empty{background:#172131;border-color:#28364a;box-shadow:inset 0 1px 2px #0005}
+.cell.occupied{background:#202d40;border-color:#344760;cursor:pointer}
+.cell.occupied:active{background:#2b3d55}
+.arrow-layer{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:visible}
+.arrow-shape{fill:none;stroke:#a9d4ff;stroke-width:0.66;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1px 2px #0008)}
+.arrow-head{fill:#d9edff;stroke:#8fc7ff;stroke-width:.04;stroke-linejoin:round;filter:drop-shadow(0 1px 2px #0008)}
+.arrow-hit{position:absolute;z-index:3;background:transparent;border:0;padding:0;cursor:pointer;touch-action:manipulation}
+.arrow-hit:focus-visible{outline:2px solid #fff;outline-offset:-3px;border-radius:8px}
+.arrow-hit:active{background:#ffffff12}
+.arrow-layer .moving{transition:transform .62s cubic-bezier(.2,.75,.25,1),opacity .55s ease}
 .message{min-height:39px;text-align:center;font-size:13px;color:var(--muted);padding:9px 0}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.btn{border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--panel);color:var(--text);font-size:14px;font-weight:650}.btn.primary{background:var(--accent);color:#102033;border-color:var(--accent)}.btn:disabled{opacity:.45}
 .help{margin-top:17px;padding:13px;background:#172031;border:1px solid var(--line);border-radius:14px;color:var(--muted);font-size:12px;line-height:1.5}.help b{color:var(--text)}
@@ -92,30 +97,57 @@ footer{text-align:center;color:#77859b;font-size:10px;margin-top:15px}
    const total=arrows.reduce((n,a)=>n+a.cells.length,0),gone=arrows.filter(a=>!a.alive).reduce((n,a)=>n+a.cells.length,0);
    $('progress').style.width=(total?gone/total*100:0)+'%';
    const board=$('board');board.innerHTML='';
-   const cellMap=new Map();for(const a of arrows)if(a.alive)for(const [r,c] of a.cells)cellMap.set(r+','+c,{a,r,c});
+   // Keep all 64 tiles in place, regardless of how many arrows remain.
    for(let r=0;r<N;r++)for(let c=0;c<N;c++){
-     const info=cellMap.get(r+','+c),b=document.createElement('button');b.type='button';b.className='cell'+(info?' segment':' empty');b.disabled=!info||won||failed||animating;
-     if(info){
-       const {a}=info,[dr,dc]=dirs[a.d],isHead=info.r===a.r&&info.c===a.c;
-       const glyph=document.createElement('span');glyph.className='glyph '+(isHead?'head':'body');
-       glyph.textContent=isHead?a.d:(dr===0?'━':'┃');b.appendChild(glyph);
-       b.setAttribute('aria-label','Arrow '+a.d+', '+a.cells.length+' boxes long');
-       b.addEventListener('click',()=>move(a));
-     }else{b.setAttribute('aria-label','Empty cell');}
-     board.appendChild(b);
+     const b=document.createElement('button');b.type='button';b.className='cell empty';b.disabled=true;b.setAttribute('aria-label','Empty grid space');board.appendChild(b);
+   }
+   const rect=board.getBoundingClientRect(),gap=4,pitch=(rect.width-gap*(N-1))/N,unit=pitch/rect.width*100;
+   const svgNS='http://www.w3.org/2000/svg',svg=document.createElementNS(svgNS,'svg');
+   svg.setAttribute('class','arrow-layer');svg.setAttribute('viewBox','0 0 800 800');svg.setAttribute('preserveAspectRatio','none');
+   board.appendChild(svg);
+   const centers=(r,c)=>[c*(100+gap/rect.width*800)+50,r*(100+gap/rect.width*800)+50];
+   for(const a of arrows)if(a.alive){
+     const [dr,dc]=dirs[a.d],head=[a.r,a.c],tail=a.cells[a.cells.length-1];
+     const [hx,hy]=centers(head[0],head[1]),[tx,ty]=centers(tail[0],tail[1]);
+     const dx=dc*34,dy=dr*34;
+     const line=document.createElementNS(svgNS,'path');
+     line.setAttribute('d',`M ${tx} ${ty} L ${hx} ${hy}`);
+     line.setAttribute('class','arrow-shape');line.setAttribute('stroke-width','57');
+     svg.appendChild(line);
+     const tip=document.createElementNS(svgNS,'polygon');
+     let pts;
+     if(a.d==='→')pts=[[hx+48,hy],[hx-17,hy-42],[hx-17,hy+42]];
+     if(a.d==='←')pts=[[hx-48,hy],[hx+17,hy-42],[hx+17,hy+42]];
+     if(a.d==='↑')pts=[[hx,hy-48],[hx-42,hy+17],[hx+42,hy+17]];
+     if(a.d==='↓')pts=[[hx,hy+48],[hx-42,hy-17],[hx+42,hy-17]];
+     tip.setAttribute('points',pts.map(p=>p.join(',')).join(' '));tip.setAttribute('class','arrow-head');svg.appendChild(tip);
+     // Transparent hit target spans every occupied cell, while the visible arrow is one continuous piece.
+     for(const [r,c] of a.cells){
+       const hit=document.createElement('button');hit.type='button';hit.className='arrow-hit';
+       hit.style.left=`${(c*(pitch+gap)/rect.width*100)}%`;
+       hit.style.top=`${(r*(pitch+gap)/rect.width*100)}%`;
+       hit.style.width=`${unit}%`;hit.style.height=`${unit}%`;
+       hit.setAttribute('aria-label',`Select ${a.d} arrow, ${a.cells.length} spaces long`);
+       hit.addEventListener('click',()=>move(a));board.appendChild(hit);
+     }
    }
  }
  async function move(a){
    if(won||failed||animating||!a.alive)return;
-   if(isBlocked(a)){hearts--;say('Blocked. That entire arrow needs a clear path.');if(hearts<=0){failed=true;say('Out of hearts. Restart the level to try again.')}render();return}
-   animating=true;const board=$('board'),buttons=[...board.children],rect=board.getBoundingClientRect(),gap=4,pitch=(rect.width-gap*(N-1))/N;
-   const cells=new Set(a.cells.map(([r,c])=>r+','+c)),[dr,dc]=dirs[a.d];
-   for(let i=0;i<N*N;i++){
-     const r=Math.floor(i/N),c=i%N;if(!cells.has(r+','+c))continue;
-     const steps=dr<0?r+1:dr>0?N-r:dc<0?c+1:N-c;
-     const b=buttons[i];b.style.transform=`translate(${dc*steps*pitch}px, ${dr*steps*pitch}px)`;b.classList.add('moving');
-   }
-   say('Arrow moving…');await new Promise(resolve=>setTimeout(resolve,590));
+   if(isBlocked(a)){hearts--;say('Blocked. Find a different arrow to clear its route.');if(hearts<=0){failed=true;say('Out of hearts. Restart the level to try again.')}render();return}
+   animating=true;
+   const svg=$('board').querySelector('svg');
+   const paths=[...svg.children];
+   const index=arrows.filter(x=>x.alive).indexOf(a);
+   // Move the visible arrow as a single continuous object toward and beyond the edge.
+   const group=document.createElementNS('http://www.w3.org/2000/svg','g');
+   const [dr,dc]=dirs[a.d];
+   const steps=N+1;
+   group.setAttribute('transform',`translate(${dc*steps*100} ${dr*steps*100})`);
+   const source=paths.slice(index*2,index*2+2);
+   source.forEach(el=>{const clone=el.cloneNode(true);group.appendChild(clone);el.style.opacity='0';});
+   svg.appendChild(group);
+   say('Arrow flowing out…');await new Promise(resolve=>setTimeout(resolve,640));
    a.alive=false;animating=false;
    if(!arrows.some(x=>x.alive)){won=true;say('Level complete. All arrows escaped.');level++;localStorage.setItem('arrows-level',String(level));$('next').style.display='block'}
    else say('Arrow cleared. Find the next open path.');
