@@ -3,120 +3,128 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#111827">
+<meta name="theme-color" content="#101522">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Arrows Puzzle">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png">
 <title>Arrows Puzzle</title>
 <style>
-:root{color-scheme:dark;--bg:#101522;--panel:#1a2232;--tile:#263248;--line:#34435c;--text:#f4f6fb;--muted:#aab5c8;--accent:#72b7ff;--bad:#ff7777;--good:#77d6a1}
+:root{color-scheme:dark;--bg:#101522;--panel:#1a2232;--tile:#202c40;--line:#34435c;--text:#f4f6fb;--muted:#aab5c8;--accent:#72b7ff;--bad:#ff7777;--good:#77d6a1}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#202d43 0,#101522 60%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100svh}
-main{max-width:520px;margin:auto;padding:calc(env(safe-area-inset-top) + 18px) 18px calc(env(safe-area-inset-bottom) + 24px)}
-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}h1{font-size:24px;margin:0;letter-spacing:-.6px}.eyebrow{font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
-.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:18px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:11px;text-align:center}.stat strong{display:block;font-size:21px;margin-top:3px}.stat span{font-size:10px;color:var(--muted);letter-spacing:1px}
-.progress{height:5px;background:#29364a;border-radius:5px;overflow:hidden;margin-bottom:20px}.progress>div{height:100%;background:var(--accent);width:0;transition:width .2s}
-.instruction{text-align:center;color:var(--muted);font-size:14px;margin:0 0 15px}
-.board{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;width:min(100%,430px);aspect-ratio:1;margin:0 auto 16px}
-.cell{border:1px solid var(--line);border-radius:10px;background:var(--tile);color:#f7f9ff;font-size:clamp(22px,7vw,34px);font-weight:800;display:grid;place-items:center;min-width:0;min-height:0;touch-action:manipulation;box-shadow:inset 0 1px 0 #ffffff0a}
-.cell:active{transform:scale(.94)}.cell.empty{background:#172031;border-color:#202b3d;box-shadow:none}.cell:disabled{opacity:1}.cell.blocked{color:var(--bad)}
-.message{min-height:42px;text-align:center;font-size:14px;color:var(--muted);padding:8px 0}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--panel);color:var(--text);font-size:14px;font-weight:650}.btn.primary{background:var(--accent);color:#102033;border-color:var(--accent)}.btn:disabled{opacity:.45}
-.help{margin-top:20px;padding:14px;background:#172031;border:1px solid var(--line);border-radius:14px;color:var(--muted);font-size:13px;line-height:1.5}.help b{color:var(--text)}
-footer{text-align:center;color:#77859b;font-size:11px;margin-top:18px}
-#installTip{display:none;background:#21354b;border:1px solid #45617f;padding:12px;border-radius:12px;font-size:13px;line-height:1.5;margin:0 0 16px}
+main{max-width:540px;margin:auto;padding:calc(env(safe-area-inset-top) + 18px) 15px calc(env(safe-area-inset-bottom) + 24px)}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}h1{font-size:24px;margin:0;letter-spacing:-.6px}.eyebrow{font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:13px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}.stat strong{display:block;font-size:20px;margin-top:3px}.stat span{font-size:10px;color:var(--muted);letter-spacing:1px}
+.progress{height:5px;background:#29364a;border-radius:5px;overflow:hidden;margin-bottom:15px}.progress>div{height:100%;background:var(--accent);width:0;transition:width .2s}
+.instruction{text-align:center;color:var(--muted);font-size:13px;margin:0 0 12px}
+.board-wrap{width:100%;max-width:470px;margin:0 auto}.board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;width:100%;aspect-ratio:1;container-type:inline-size}
+.cell{appearance:none;border:1px solid #35445c;border-radius:7px;background:#182335;min-width:0;min-height:0;width:100%;height:100%;padding:0;display:grid;place-items:center;position:relative;overflow:visible;touch-action:manipulation;transition:transform .55s cubic-bezier(.2,.75,.25,1),opacity .48s ease,background .15s}
+.cell.empty{background:#1b2739;border-color:#2d3a50;box-shadow:inset 0 1px 0 #ffffff08}
+.cell.segment{background:#385779;border-color:#6b9bc7;box-shadow:inset 0 1px 0 #ffffff20;cursor:pointer}
+.cell.segment:active{filter:brightness(1.2)}
+.cell.segment .glyph{font-size:clamp(15px,4.6vw,25px);line-height:1;font-weight:900;color:#f5f9ff;pointer-events:none}
+.cell.segment .glyph.body{font-size:clamp(19px,5vw,27px);color:#d9eaff}
+.cell.segment.moving{z-index:5;opacity:0.15}
+.cell.empty:disabled{cursor:default}
+.message{min-height:39px;text-align:center;font-size:13px;color:var(--muted);padding:9px 0}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.btn{border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--panel);color:var(--text);font-size:14px;font-weight:650}.btn.primary{background:var(--accent);color:#102033;border-color:var(--accent)}.btn:disabled{opacity:.45}
+.help{margin-top:17px;padding:13px;background:#172031;border:1px solid var(--line);border-radius:14px;color:var(--muted);font-size:12px;line-height:1.5}.help b{color:var(--text)}
+footer{text-align:center;color:#77859b;font-size:10px;margin-top:15px}
+#installTip{display:none;background:#21354b;border:1px solid #45617f;padding:12px;border-radius:12px;font-size:13px;line-height:1.5;margin:0 0 15px}
 </style>
 </head>
-<body>
-<main>
+<body><main>
 <header><div><div class="eyebrow">Logic puzzle</div><h1>Arrows Puzzle</h1></div><div style="font-size:26px">↗</div></header>
 <div id="installTip">To install: tap <b>Share</b> in Safari, then choose <b>Add to Home Screen</b>.</div>
-<section class="stats">
- <div class="stat"><span>LEVEL</span><strong id="level">1</strong></div>
- <div class="stat"><span>ARROWS LEFT</span><strong id="left">6</strong></div>
- <div class="stat"><span>HEARTS</span><strong id="hearts">♥ ♥ ♥</strong></div>
-</section>
+<section class="stats"><div class="stat"><span>LEVEL</span><strong id="level">1</strong></div><div class="stat"><span>ARROWS LEFT</span><strong id="left">—</strong></div><div class="stat"><span>HEARTS</span><strong id="hearts">♥ ♥ ♥</strong></div></section>
 <div class="progress"><div id="progress"></div></div>
-<p class="instruction">Clear the board. Tap an arrow to send it out.</p>
-<div id="board" class="board" aria-label="Puzzle board"></div>
-<div id="message" class="message" role="status" aria-live="polite">Find an arrow with a clear path first.</div>
-<div class="actions">
- <button class="btn" id="hint">Hint</button><button class="btn" id="restart">Restart</button>
- <button class="btn primary" id="next" style="display:none;grid-column:1/-1">Next level →</button>
-</div>
-<div class="help"><b>How to play</b><br>Each arrow can only leave the board in the direction it points. If another arrow is in its path, it is blocked. Clear every arrow to finish the level. You have three hearts.</div>
+<p class="instruction">Tap any segment of an arrow to send the whole arrow out.</p>
+<div class="board-wrap"><div id="board" class="board" aria-label="Puzzle board"></div></div>
+<div id="message" class="message" role="status" aria-live="polite">Long arrows occupy multiple boxes. Clear the exit path to remove them.</div>
+<div class="actions"><button class="btn" id="hint">Hint</button><button class="btn" id="restart">Restart level</button><button class="btn primary" id="next" style="display:none;grid-column:1/-1">Next level →</button></div>
+<div class="help"><b>How to play</b><br>Each arrow is one long piece made of connected boxes. Tap any part to move the entire arrow in the direction of its head. Other arrows block its path. Clear every arrow to finish. You have three hearts.</div>
 <footer>Progress is saved on this device · Works offline after first load</footer>
 </main>
 <script>
-(() => {
- const $=id=>document.getElementById(id);
- const directions={'↑':[-1,0],'↓':[1,0],'←':[0,-1],'→':[0,1]};
- // Each board is a set of [row, column, direction] positions.
- const levels=[
- [[0,2,'←'],[2,2,'↑'],[2,4,'→'],[2,3,'→'],[4,3,'↓'],[3,3,'↓']],
- [[0,3,'←'],[2,3,'↑'],[2,5,'→'],[2,4,'→'],[5,4,'↓'],[4,4,'↓'],[4,1,'←'],[4,2,'←']],
- [[1,1,'↑'],[0,1,'←'],[1,4,'→'],[1,3,'→'],[3,4,'↓'],[2,4,'↓'],[4,2,'←'],[4,3,'←'],[5,5,'↓'],[3,5,'↓']],
- [[0,0,'←'],[0,2,'↑'],[1,2,'↑'],[2,2,'→'],[2,3,'→'],[2,4,'↓'],[3,4,'↓'],[4,4,'←'],[4,3,'←'],[5,1,'↓'],[6,1,'↓']],
- [[0,3,'↑'],[1,3,'↑'],[2,3,'←'],[2,2,'←'],[2,1,'↓'],[3,1,'↓'],[4,1,'→'],[4,2,'→'],[4,5,'↓'],[5,5,'↓'],[6,5,'→'],[6,6,'→']]
- ];
- let level=Math.max(0,Number(localStorage.getItem('arrows-level')||0));
- let hearts=3,arrows=[],won=false,failed=false;
- const say=t=>$('message').textContent=t;
- function createLevel(){
-   const data=levels[level%levels.length];
-   arrows=data.map((v,id)=>({r:v[0],c:v[1],d:v[2],id,alive:true}));
-   hearts=3;won=false;failed=false;
-   $('next').style.display='none';$('hint').disabled=false;
-   say('Find an arrow with a clear path first.');render();
+(()=>{
+ const $=id=>document.getElementById(id), N=8;
+ const dirs={'↑':[-1,0],'↓':[1,0],'←':[0,-1],'→':[0,1]};
+ let level=Math.max(0,Number(localStorage.getItem('arrows-level')||0)),hearts=3,arrows=[],won=false,failed=false,animating=false;
+ function rng(seed){let x=seed>>>0;return()=>{x=(x+0x6D2B79F5)>>>0;let t=x;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
+ function buildPuzzle(lv){
+   const rand=rng(982451653+lv*7919), occupied=new Set(), placed=[];
+   const dirsList=['↑','↓','←','→'], candidates=[];
+   // Candidate pieces have a head and a tail; the whole piece moves toward the head.
+   for(let len=2;len<=4;len++)for(const d of dirsList){
+     const [dr,dc]=dirs[d];
+     for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+       const tailR=r-dr*(len-1),tailC=c-dc*(len-1);
+       if(tailR<0||tailR>=N||tailC<0||tailC>=N)continue;
+       candidates.push({r,c,d,len});
+     }
+   }
+   for(let i=candidates.length-1;i>0;i--){const j=Math.floor(rand()*(i+1));[candidates[i],candidates[j]]=[candidates[j],candidates[i]]}
+   const maxPieces=Math.min(23,17+Math.floor(lv/2)), targetCells=Math.min(57,45+Math.floor(lv/2));
+   for(const p of candidates){
+     if(placed.length>=maxPieces||occupied.size>=targetCells)break;
+     const [dr,dc]=dirs[p.d], cells=[];
+     for(let k=p.len-1;k>=0;k--){const r=p.r-dr*k,c=p.c-dc*k;cells.push([r,c])}
+     if(cells.some(([r,c])=>occupied.has(r+','+c)))continue;
+     // The new arrow's head must have an unobstructed route to the edge.
+     let clear=true;
+     for(let r=p.r+dr,c=p.c+dc;r>=0&&r<N&&c>=0&&c<N;r+=dr,c+=dc)if(occupied.has(r+','+c)){clear=false;break}
+     if(!clear)continue;
+     const a={id:placed.length,r:p.r,c:p.c,d:p.d,cells,alive:true};
+     placed.push(a);cells.forEach(([r,c])=>occupied.add(r+','+c));
+   }
+   return placed;
  }
+ function say(t){$('message').textContent=t}
+ function createLevel(){arrows=buildPuzzle(level);hearts=3;won=false;failed=false;animating=false;$('next').style.display='none';$('hint').disabled=false;say('Find an arrow with a clear route to the edge.');render()}
  function isBlocked(a){
-   const [dr,dc]=directions[a.d];
-   return arrows.some(b=>b.alive&&b.id!==a.id&&
-    ((dr===0&&b.r===a.r&&(b.c-a.c)*dc>0)||(dc===0&&b.c===a.c&&(b.r-a.r)*dr>0)));
+   const [dr,dc]=dirs[a.d];
+   return arrows.some(b=>b.alive&&b.id!==a.id&&b.cells.some(([r,c])=>
+     (dr===0&&r===a.r&&(c-a.c)*dc>0)||(dc===0&&c===a.c&&(r-a.r)*dr>0)));
  }
  function render(){
-   $('level').textContent=level+1;
-   const remaining=arrows.filter(a=>a.alive).length;
-   $('left').textContent=remaining;
-   $('hearts').textContent='♥ '.repeat(hearts).trim()+'♡ '.repeat(3-hearts);
-   $('progress').style.width=((arrows.length-remaining)/arrows.length*100)+'%';
+   $('level').textContent=level+1;const remaining=arrows.filter(a=>a.alive).length;
+   $('left').textContent=remaining;$('hearts').textContent='♥ '.repeat(hearts).trim()+'♡ '.repeat(3-hearts);
+   const total=arrows.reduce((n,a)=>n+a.cells.length,0),gone=arrows.filter(a=>!a.alive).reduce((n,a)=>n+a.cells.length,0);
+   $('progress').style.width=(total?gone/total*100:0)+'%';
    const board=$('board');board.innerHTML='';
-   for(let r=0;r<7;r++)for(let c=0;c<7;c++){
-     const a=arrows.find(x=>x.alive&&x.r===r&&x.c===c);
-     const b=document.createElement('button');b.type='button';
-     b.className='cell '+(a?'':'empty');b.disabled=!a;
-     b.setAttribute('aria-label',a?'Arrow '+a.d:'Empty cell');
-     if(a){b.textContent=a.d;b.addEventListener('click',()=>move(a));}
-     else b.textContent='';
+   const cellMap=new Map();for(const a of arrows)if(a.alive)for(const [r,c] of a.cells)cellMap.set(r+','+c,{a,r,c});
+   for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+     const info=cellMap.get(r+','+c),b=document.createElement('button');b.type='button';b.className='cell'+(info?' segment':' empty');b.disabled=!info||won||failed||animating;
+     if(info){
+       const {a}=info,[dr,dc]=dirs[a.d],isHead=info.r===a.r&&info.c===a.c;
+       const glyph=document.createElement('span');glyph.className='glyph '+(isHead?'head':'body');
+       glyph.textContent=isHead?a.d:(dr===0?'━':'┃');b.appendChild(glyph);
+       b.setAttribute('aria-label','Arrow '+a.d+', '+a.cells.length+' boxes long');
+       b.addEventListener('click',()=>move(a));
+     }else{b.setAttribute('aria-label','Empty cell');}
      board.appendChild(b);
    }
  }
- function move(a){
-   if(won||failed||!a.alive)return;
-   if(isBlocked(a)){
-     hearts--;say('Blocked. Find a different arrow to remove first.');
-     if(hearts<=0){failed=true;say('Out of hearts. Restart the level to try again.');}
-     render();return;
+ async function move(a){
+   if(won||failed||animating||!a.alive)return;
+   if(isBlocked(a)){hearts--;say('Blocked. That entire arrow needs a clear path.');if(hearts<=0){failed=true;say('Out of hearts. Restart the level to try again.')}render();return}
+   animating=true;const board=$('board'),buttons=[...board.children],rect=board.getBoundingClientRect(),gap=4,pitch=(rect.width-gap*(N-1))/N;
+   const cells=new Set(a.cells.map(([r,c])=>r+','+c)),[dr,dc]=dirs[a.d];
+   for(let i=0;i<N*N;i++){
+     const r=Math.floor(i/N),c=i%N;if(!cells.has(r+','+c))continue;
+     const steps=dr<0?r+1:dr>0?N-r:dc<0?c+1:N-c;
+     const b=buttons[i];b.style.transform=`translate(${dc*steps*pitch}px, ${dr*steps*pitch}px)`;b.classList.add('moving');
    }
-   a.alive=false;
-   if(!arrows.some(x=>x.alive)){
-     won=true;say('Level complete. All arrows escaped.');$('next').style.display='block';
-     level++;localStorage.setItem('arrows-level',String(level));
-   }else say('Clear path. Nice move.');
+   say('Arrow moving…');await new Promise(resolve=>setTimeout(resolve,590));
+   a.alive=false;animating=false;
+   if(!arrows.some(x=>x.alive)){won=true;say('Level complete. All arrows escaped.');level++;localStorage.setItem('arrows-level',String(level));$('next').style.display='block'}
+   else say('Arrow cleared. Find the next open path.');
    render();
  }
- $('hint').addEventListener('click',()=>{
-   if(won||failed)return;
-   const a=arrows.find(x=>x.alive&&!isBlocked(x));
-   say(a?'Hint: try the '+a.d+' arrow in row '+(a.r+1)+', column '+(a.c+1)+'.':'No clear exits. Look for an arrow you can unblock.');
- });
- $('restart').addEventListener('click',createLevel);
- $('next').addEventListener('click',createLevel);
+ $('hint').addEventListener('click',()=>{if(won||failed||animating)return;const a=arrows.find(x=>x.alive&&!isBlocked(x));say(a?'Hint: the '+a.d+' arrow ('+a.cells.length+' boxes long) at row '+(a.r+1)+', column '+(a.c+1)+' can leave.':'No clear exits found.');});
+ $('restart').addEventListener('click',createLevel);$('next').addEventListener('click',createLevel);
  createLevel();
- if(!('serviceWorker' in navigator))$('installTip').style.display='block';
  if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.navigator.standalone)$('installTip').style.display='block';
- if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+ if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 })();
-</script>
-</body></html>
+</script></body></html>
