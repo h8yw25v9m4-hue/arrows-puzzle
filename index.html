@@ -17,9 +17,9 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:13px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}.stat strong{display:block;font-size:20px;margin-top:3px}.stat span{font-size:10px;color:var(--muted);letter-spacing:1px}
 .progress{height:5px;background:#29364a;border-radius:5px;overflow:hidden;margin-bottom:15px}.progress>div{height:100%;background:var(--accent);width:0;transition:width .2s}
 .instruction{text-align:center;color:var(--muted);font-size:13px;margin:0 0 12px}
-.board-wrap{width:100%;max-width:470px;margin:0 auto}.board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;width:100%;aspect-ratio:1;container-type:inline-size}
+.board-wrap{width:100%;max-width:470px;margin:0 auto}.board{display:grid;grid-template-columns:repeat(20,minmax(0,1fr));gap:2px;width:100%;aspect-ratio:1;container-type:inline-size}
 .board-wrap{width:100%;max-width:470px;margin:0 auto}
-.board{position:relative;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;width:100%;aspect-ratio:1;isolation:isolate}
+.board{position:relative;display:grid;grid-template-columns:repeat(20,minmax(0,1fr));gap:2px;width:100%;aspect-ratio:1;isolation:isolate}
 .cell{appearance:none;border:1px solid #303b4e;border-radius:8px;background:#1a2434;min-width:0;min-height:0;width:100%;height:100%;padding:0;position:relative;z-index:1;touch-action:manipulation;transition:background .15s,border-color .15s}
 .cell.empty{background:#172131;border-color:#28364a;box-shadow:inset 0 1px 2px #0005}
 .cell.occupied{background:#202d40;border-color:#344760;cursor:pointer}
@@ -46,7 +46,7 @@ body{
  linear-gradient(160deg,#0b1425 0%,#080e1a 58%,#0d1728 100%);
  background-attachment:fixed;
 }
-main{max-width:560px;padding-top:calc(env(safe-area-inset-top) + 22px)}
+main{max-width:620px;padding-top:calc(env(safe-area-inset-top) + 16px)}
 header{margin-bottom:20px}
 header>div:first-child{position:relative;padding-left:14px}
 header>div:first-child:before{content:"";position:absolute;left:0;top:3px;bottom:3px;width:3px;border-radius:4px;background:linear-gradient(180deg,#a4ecff,#638dff);box-shadow:0 0 14px #74caff88}
@@ -63,13 +63,13 @@ header>div:last-child{width:42px;height:42px;border-radius:14px;display:grid;pla
 .progress>div{position:relative;border-radius:20px;background:linear-gradient(90deg,#58a9ff,#73e0e6 58%,#c0f1ff);box-shadow:0 0 13px #65caff88;transition:width .55s cubic-bezier(.2,.8,.2,1)}
 .progress>div:after{content:"";position:absolute;right:0;top:-2px;width:10px;height:9px;border-radius:50%;background:#e5fbff;box-shadow:0 0 10px 3px #7bd8ff99}
 .instruction{font-size:13px;font-weight:550;color:#b2c6e1;margin-bottom:14px;letter-spacing:.05px}
-.board-wrap{max-width:480px;position:relative;padding:7px;border-radius:21px;background:linear-gradient(145deg,rgba(81,131,184,.17),rgba(17,31,52,.12));border:1px solid rgba(142,188,231,.15);box-shadow:0 18px 50px #0005,inset 0 1px 0 #ffffff12}
+.board-wrap{max-width:560px;position:relative;padding:6px;border-radius:21px;background:linear-gradient(145deg,rgba(81,131,184,.17),rgba(17,31,52,.12));border:1px solid rgba(142,188,231,.15);box-shadow:0 18px 50px #0005,inset 0 1px 0 #ffffff12}
 .board-wrap:before{content:"";position:absolute;inset:-1px;border-radius:22px;pointer-events:none;background:linear-gradient(135deg,#a8dcff22,transparent 30%,transparent 70%,#6daaff15)}
 .board{gap:4px}
-.cell{border-radius:8px;border-color:rgba(113,145,184,.16);background:rgba(21,34,54,.8)}
-.cell.empty{background:linear-gradient(145deg,rgba(18,30,49,.92),rgba(22,36,57,.9));border-color:rgba(121,158,200,.16);box-shadow:inset 0 1px 3px #0005,inset 0 0 0 1px #ffffff03}
+.cell{border-radius:4px;border-color:rgba(113,145,184,.12);background:linear-gradient(145deg,rgba(23,38,60,.88),rgba(13,25,43,.96))}
+.cell.empty{background:linear-gradient(145deg,rgba(17,29,48,.78),rgba(20,34,54,.9));border-color:rgba(121,158,200,.11);box-shadow:inset 0 1px 2px #0005}
 .arrow-layer{overflow:visible}
-.arrow-shape{stroke:url(#arrowGradient);stroke-width:56;filter:url(#arrowGlow)}
+.arrow-shape{stroke:url(#arrowGradient);stroke-width:48;filter:url(#arrowGlow)}
 .arrow-head{fill:url(#headGradient);stroke:#d8f5ff;stroke-width:1.2;filter:url(#arrowGlow)}
 .arrow-hit:focus-visible{outline:2px solid #c4efff;outline-offset:-4px;box-shadow:0 0 0 4px #79caff33}
 .arrow-hit:active{background:#c7edff20}
@@ -100,16 +100,16 @@ footer{color:#627995;letter-spacing:.2px}
 <div id="installTip">To install: tap <b>Share</b> in Safari, then choose <b>Add to Home Screen</b>.</div>
 <section class="stats"><div class="stat"><span>LEVEL</span><strong id="level">1</strong></div><div class="stat"><span>ARROWS LEFT</span><strong id="left">—</strong></div><div class="stat"><span>HEARTS</span><strong id="hearts">♥ ♥ ♥</strong></div></section>
 <div class="progress"><div id="progress"></div></div>
-<p class="instruction">Tap any segment of an arrow to send the whole arrow out.</p>
+<p class="instruction">Tap any segment. The arrow snakes along its bends, then exits from its tip.</p>
 <div class="board-wrap"><div id="board" class="board" aria-label="Puzzle board"></div></div>
-<div id="message" class="message" role="status" aria-live="polite">Long arrows occupy multiple boxes. Clear the exit path to remove them.</div>
+<div id="message" class="message" role="status" aria-live="polite">20 × 20 grid. Follow each arrow through its bends to the exit.</div>
 <div class="actions"><button class="btn" id="hint">Hint</button><button class="btn" id="restart">Restart level</button><button class="btn primary" id="next" style="display:none;grid-column:1/-1">Next level →</button></div>
-<div class="help"><b>How to play</b><br>Each arrow is one long piece made of connected boxes. Tap any part to move the entire arrow in the direction of its head. Other arrows block its path. Clear every arrow to finish. You have three hearts.</div>
+<div class="help"><b>How to play</b><br>The board is 20 × 20. Each arrow is a continuous path that may bend. Tap any segment: the whole arrow follows its own route and exits in the direction of its head. Other arrows can block the exit. Clear every arrow to finish. You have three hearts.</div>
 <footer>Progress is saved on this device · Works offline after first load</footer>
 </main>
 <script>
 (()=>{
- const $=id=>document.getElementById(id), N=8;
+ const $=id=>document.getElementById(id), N=20;
  const dirs={'↑':[-1,0],'↓':[1,0],'←':[0,-1],'→':[0,1]};
  let level=Math.max(0,Number(localStorage.getItem('arrows-level')||0)),hearts=3,arrows=[],won=false,failed=false,animating=false;
  function rng(seed){let x=seed>>>0;return()=>{x=(x+0x6D2B79F5)>>>0;let t=x;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
@@ -118,7 +118,7 @@ footer{color:#627995;letter-spacing:.2px}
    const dirsList=['↑','↓','←','→'], candidates=[];
    // Build each arrow from its head backwards. Some paths deliberately turn at
    // right angles, while the final segment always points in the exit direction.
-   for(let len=3;len<=7;len++)for(const d of dirsList){
+   for(let len=4;len<=10;len++)for(const d of dirsList){
      const [dr,dc]=dirs[d];
      for(let r=0;r<N;r++)for(let c=0;c<N;c++){
        for(let variant=0;variant<2;variant++){
@@ -146,7 +146,7 @@ footer{color:#627995;letter-spacing:.2px}
      }
    }
    for(let i=candidates.length-1;i>0;i--){const j=Math.floor(rand()*(i+1));[candidates[i],candidates[j]]=[candidates[j],candidates[i]]}
-   const maxPieces=Math.min(22,16+Math.floor(lv/2)),targetCells=Math.min(56,43+Math.floor(lv/2));
+   const maxPieces=Math.min(42,30+Math.floor(lv/2)),targetCells=Math.min(210,155+Math.floor(lv*1.5));
    for(const p of candidates){
      if(placed.length>=maxPieces||occupied.size>=targetCells)break;
      if(p.cells.some(([r,c])=>occupied.has(r+','+c)))continue;
@@ -178,9 +178,9 @@ footer{color:#627995;letter-spacing:.2px}
    for(let r=0;r<N;r++)for(let c=0;c<N;c++){
      const b=document.createElement('button');b.type='button';b.className='cell empty';b.disabled=true;b.setAttribute('aria-label','Empty grid space');board.appendChild(b);
    }
-   const rect=board.getBoundingClientRect(),gap=4,pitch=(rect.width-gap*(N-1))/N,unit=pitch/rect.width*100;
+   const rect=board.getBoundingClientRect(),gap=2,pitch=(rect.width-gap*(N-1))/N,unit=pitch/rect.width*100;
    const svgNS='http://www.w3.org/2000/svg',svg=document.createElementNS(svgNS,'svg');
-   svg.setAttribute('class','arrow-layer');svg.setAttribute('viewBox','0 0 800 800');svg.setAttribute('preserveAspectRatio','none');
+   svg.setAttribute('class','arrow-layer');svg.setAttribute('viewBox','0 0 2000 2000');svg.setAttribute('preserveAspectRatio','none');
    const defs=document.createElementNS(svgNS,'defs');
    defs.innerHTML='<linearGradient id="arrowGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#d8f6ff"/><stop offset="48%" stop-color="#8ed5ff"/><stop offset="100%" stop-color="#79aaff"/></linearGradient><linearGradient id="headGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#effcff"/><stop offset="100%" stop-color="#8ecaff"/></linearGradient><filter id="arrowGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
    svg.appendChild(defs);board.appendChild(svg);
@@ -195,7 +195,7 @@ footer{color:#627995;letter-spacing:.2px}
      points[points.length-1]=[headBaseX,headBaseY];
      const line=document.createElementNS(svgNS,'path');
      line.setAttribute('d',points.map(([x,y],i)=>(i===0?'M ':'L ')+x+' '+y).join(' '));
-     line.setAttribute('class','arrow-shape');line.setAttribute('stroke-width','56');
+     line.setAttribute('class','arrow-shape');line.dataset.arrowId=a.id;line.setAttribute('stroke-width','48');
      svg.appendChild(line);
      const tip=document.createElementNS(svgNS,'polygon');
      let pts;
@@ -203,7 +203,7 @@ footer{color:#627995;letter-spacing:.2px}
      if(a.d==='←')pts=[[hx-48,hy],[hx+17,hy-42],[hx+17,hy+42]];
      if(a.d==='↑')pts=[[hx,hy-48],[hx-42,hy+17],[hx+42,hy+17]];
      if(a.d==='↓')pts=[[hx,hy+48],[hx-42,hy-17],[hx+42,hy-17]];
-     tip.setAttribute('points',pts.map(p=>p.join(',')).join(' '));tip.setAttribute('class','arrow-head');svg.appendChild(tip);
+     tip.setAttribute('points',pts.map(p=>p.join(',')).join(' '));tip.setAttribute('class','arrow-head');tip.dataset.arrowId=a.id;svg.appendChild(tip);
      // Transparent hit target spans every occupied cell, while the visible arrow is one continuous piece.
      for(const [r,c] of a.cells){
        const hit=document.createElement('button');hit.type='button';hit.className='arrow-hit';
@@ -215,33 +215,65 @@ footer{color:#627995;letter-spacing:.2px}
      }
    }
  }
+ function isBlocked(a){
+   const [dr,dc]=dirs[a.d];
+   // The arrow exits straight ahead from its head; its body follows the bends.
+   for(let r=a.r+dr,c=a.c+dc;r>=0&&r<N&&c>=0&&c<N;r+=dr,c+=dc){
+     if(arrows.some(b=>b.alive&&b.id!==a.id&&b.cells.some(([br,bc])=>br===r&&bc===c)))return true;
+   }
+   return false;
+ }
+ function samplePolyline(points,distance){
+   if(distance<=0)return points[0];
+   for(let i=0;i<points.length-1;i++){
+     const a=points[i],b=points[i+1],seg=Math.hypot(b[0]-a[0],b[1]-a[1]);
+     if(distance<=seg){const t=distance/seg;return[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]}
+     distance-=seg;
+   }
+   const last=points[points.length-1],prev=points[points.length-2]||last;
+   const vx=last[0]-prev[0],vy=last[1]-prev[1],m=Math.hypot(vx,vy)||1;
+   return[last[0]+vx/m*distance,last[1]+vy/m*distance];
+ }
+ function polygonForHead(x,y,d){
+   if(d==='→')return[[x+48,y],[x-17,y-34],[x-17,y+34]];
+   if(d==='←')return[[x-48,y],[x+17,y-34],[x+17,y+34]];
+   if(d==='↑')return[[x,y-48],[x-34,y+17],[x+34,y+17]];
+   return[[x,y+48],[x-34,y-17],[x+34,y-17]];
+ }
  async function move(a){
    if(won||failed||animating||!a.alive)return;
-   if(isBlocked(a)){hearts--;say('Blocked. Find a different arrow to clear its route.');if(hearts<=0){failed=true;say('Out of hearts. Restart the level to try again.')}render();return}
+   if(isBlocked(a)){hearts--;say('Blocked. Clear the arrow ahead first.');if(hearts<=0){failed=true;say('Out of hearts. Restart the level to try again.')}render();return}
    animating=true;
-   const board=$('board'),svg=board.querySelector('svg');
-   const aliveOrder=arrows.filter(x=>x.alive);
-   const index=aliveOrder.indexOf(a);
-   const source=[...svg.querySelectorAll('.arrow-shape,.arrow-head')].slice(index*2,index*2+2);
-   // Clone both the continuous tail and arrowhead into one moving SVG group.
-   const group=document.createElementNS('http://www.w3.org/2000/svg','g');
-   group.setAttribute('class','arrow-flight');
-   source.forEach(el=>{group.appendChild(el.cloneNode(true));el.style.opacity='0';});
-   group.style.transformBox='fill-box';
-   group.style.transformOrigin='center';
-   group.style.transition='transform 760ms cubic-bezier(.18,.72,.22,1)';
-   group.style.transform='translate(0px, 0px)';
-   svg.appendChild(group);
-   say('Arrow flowing out…');
-   // Trigger layout before changing the transform so the browser animates it.
-   void group.getBoundingClientRect();
-   const distance=board.getBoundingClientRect().width*1.25;
-   requestAnimationFrame(()=>requestAnimationFrame(()=>{
-     group.style.transform=`translate(${dcFor(a.d)*distance}px, ${drFor(a.d)*distance}px)`;
-   }));
-   await new Promise(resolve=>setTimeout(resolve,840));
-   sparkleBurst(a.d);
-   a.alive=false;animating=false;
+   const board=$('board'),svg=board.querySelector('svg'),ns='http://www.w3.org/2000/svg';
+   const originalLine=svg.querySelector(`.arrow-shape[data-arrow-id="${a.id}"]`);
+   const originalHead=svg.querySelector(`.arrow-head[data-arrow-id="${a.id}"]`);
+   if(!originalLine||!originalHead){animating=false;return}
+   const group=document.createElementNS(ns,'g');group.setAttribute('class','arrow-flight');
+   const line=originalLine.cloneNode(true),head=originalHead.cloneNode(true);
+   line.removeAttribute('data-arrow-id');head.removeAttribute('data-arrow-id');
+   group.append(line,head);svg.appendChild(group);
+   originalLine.style.opacity='0';originalHead.style.opacity='0';
+   // The polyline is ordered tail-to-head. Each segment advances along it,
+   // so the whole arrow snakes through every existing bend before exiting.
+   const route=a.cells.map(([r,c])=>[50+c*100,50+r*100]);
+   const [dr,dc]=dirs[a.d],headPoint=route[route.length-1];
+   const exitSteps=(dc>0?N-a.c:dc<0?a.c+1:dr>0?N-a.r:a.r+1)+a.cells.length+2;
+   for(let i=1;i<=exitSteps;i++)route.push([headPoint[0]+dc*100*i,headPoint[1]+dr*100*i]);
+   const count=a.cells.length,duration=Math.min(2100,850+count*48),started=performance.now();
+   say('Arrow following its path…');
+   await new Promise(resolve=>{
+     function frame(now){
+       const t=Math.min(1,(now-started)/duration),distance=t*(exitSteps+count+1)*100;
+       const pts=[];
+       for(let i=0;i<count;i++)pts.push(samplePolyline(route,i+distance));
+       line.setAttribute('d',pts.map(([x,y],i)=>(i?'L ':'M ')+x+' '+y).join(' '));
+       const tip=samplePolyline(route,count-1+distance);
+       head.setAttribute('points',polygonForHead(tip[0],tip[1],a.d).map(p=>p.join(',')).join(' '));
+       if(t<1)requestAnimationFrame(frame);else resolve();
+     }
+     requestAnimationFrame(frame);
+   });
+   sparkleBurst(a.d);a.alive=false;animating=false;
    if(!arrows.some(x=>x.alive)){won=true;say('Level complete. All arrows escaped.');levelCelebration();level++;localStorage.setItem('arrows-level',String(level));$('next').style.display='block'}
    else say('Arrow cleared. Find the next open path.');
    render();
