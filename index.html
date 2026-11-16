@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Arrows Puzzle">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Arrows Puzzle</title>
+<style>
+:root{color-scheme:dark;--bg:#101522;--panel:#1a2232;--tile:#263248;--line:#34435c;--text:#f4f6fb;--muted:#aab5c8;--accent:#72b7ff;--bad:#ff7777;--good:#77d6a1}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#202d43 0,#101522 60%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100svh}
+main{max-width:520px;margin:auto;padding:calc(env(safe-area-inset-top) + 18px) 18px calc(env(safe-area-inset-bottom) + 24px)}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}h1{font-size:24px;margin:0;letter-spacing:-.6px}.eyebrow{font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:18px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:11px;text-align:center}.stat strong{display:block;font-size:21px;margin-top:3px}.stat span{font-size:10px;color:var(--muted);letter-spacing:1px}
+.progress{height:5px;background:#29364a;border-radius:5px;overflow:hidden;margin-bottom:20px}.progress>div{height:100%;background:var(--accent);width:0;transition:width .2s}
+.instruction{text-align:center;color:var(--muted);font-size:14px;margin:0 0 15px}
+.board{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;width:min(100%,430px);aspect-ratio:1;margin:0 auto 16px}
+.cell{border:1px solid var(--line);border-radius:10px;background:var(--tile);color:#f7f9ff;font-size:clamp(22px,7vw,34px);font-weight:800;display:grid;place-items:center;min-width:0;min-height:0;touch-action:manipulation;box-shadow:inset 0 1px 0 #ffffff0a}
+.cell:active{transform:scale(.94)}.cell.empty{background:#172031;border-color:#202b3d;box-shadow:none}.cell:disabled{opacity:1}.cell.blocked{color:var(--bad)}
+.message{min-height:42px;text-align:center;font-size:14px;color:var(--muted);padding:8px 0}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--panel);color:var(--text);font-size:14px;font-weight:650}.btn.primary{background:var(--accent);color:#102033;border-color:var(--accent)}.btn:disabled{opacity:.45}
+.help{margin-top:20px;padding:14px;background:#172031;border:1px solid var(--line);border-radius:14px;color:var(--muted);font-size:13px;line-height:1.5}.help b{color:var(--text)}
+footer{text-align:center;color:#77859b;font-size:11px;margin-top:18px}
+#installTip{display:none;background:#21354b;border:1px solid #45617f;padding:12px;border-radius:12px;font-size:13px;line-height:1.5;margin:0 0 16px}
+</style>
+</head>
+<body>
+<main>
+<header><div><div class="eyebrow">Logic puzzle</div><h1>Arrows Puzzle</h1></div><div style="font-size:26px">↗</div></header>
+<div id="installTip">To install: tap <b>Share</b> in Safari, then choose <b>Add to Home Screen</b>.</div>
+<section class="stats">
+ <div class="stat"><span>LEVEL</span><strong id="level">1</strong></div>
+ <div class="stat"><span>ARROWS LEFT</span><strong id="left">6</strong></div>
+ <div class="stat"><span>HEARTS</span><strong id="hearts">♥ ♥ ♥</strong></div>
+</section>
+<div class="progress"><div id="progress"></div></div>
+<p class="instruction">Clear the board. Tap an arrow to send it out.</p>
+<div id="board" class="board" aria-label="Puzzle board"></div>
+<div id="message" class="message" role="status" aria-live="polite">Find an arrow with a clear path first.</div>
+<div class="actions">
+ <button class="btn" id="hint">Hint</button><button class="btn" id="restart">Restart</button>
+ <button class="btn primary" id="next" style="display:none;grid-column:1/-1">Next level →</button>
+</div>
+<div class="help"><b>How to play</b><br>Each arrow can only leave the board in the direction it points. If another arrow is in its path, it is blocked. Clear every arrow to finish the level. You have three hearts.</div>
+<footer>Progress is saved on this device · Works offline after first load</footer>
+</main>
+<script>
+(() => {
+ const $=id=>document.getElementById(id);
+ const directions={'↑':[-1,0],'↓':[1,0],'←':[0,-1],'→':[0,1]};
+ // Each board is a set of [row, column, direction] positions.
+ const levels=[
+ [[0,2,'←'],[2,2,'↑'],[2,4,'→'],[2,3,'→'],[4,3,'↓'],[3,3,'↓']],
+ [[0,3,'←'],[2,3,'↑'],[2,5,'→'],[2,4,'→'],[5,4,'↓'],[4,4,'↓'],[4,1,'←'],[4,2,'←']],
+ [[1,1,'↑'],[0,1,'←'],[1,4,'→'],[1,3,'→'],[3,4,'↓'],[2,4,'↓'],[4,2,'←'],[4,3,'←'],[5,5,'↓'],[3,5,'↓']],
+ [[0,0,'←'],[0,2,'↑'],[1,2,'↑'],[2,2,'→'],[2,3,'→'],[2,4,'↓'],[3,4,'↓'],[4,4,'←'],[4,3,'←'],[5,1,'↓'],[6,1,'↓']],
+ [[0,3,'↑'],[1,3,'↑'],[2,3,'←'],[2,2,'←'],[2,1,'↓'],[3,1,'↓'],[4,1,'→'],[4,2,'→'],[4,5,'↓'],[5,5,'↓'],[6,5,'→'],[6,6,'→']]
+ ];
+ let level=Math.max(0,Number(localStorage.getItem('arrows-level')||0));
+ let hearts=3,arrows=[],won=false,failed=false;
+ const say=t=>$('message').textContent=t;
+ function createLevel(){
+   const data=levels[level%levels.length];
+   arrows=data.map((v,id)=>({r:v[0],c:v[1],d:v[2],id,alive:true}));
+   hearts=3;won=false;failed=false;
+   $('next').style.display='none';$('hint').disabled=false;
+   say('Find an arrow with a clear path first.');render();
+ }
+ function isBlocked(a){
+   const [dr,dc]=directions[a.d];
+   return arrows.some(b=>b.alive&&b.id!==a.id&&
+    ((dr===0&&b.r===a.r&&(b.c-a.c)*dc>0)||(dc===0&&b.c===a.c&&(b.r-a.r)*dr>0)));
+ }
+ function render(){
+   $('level').textContent=level+1;
+   const remaining=arrows.filter(a=>a.alive).length;
+   $('left').textContent=remaining;
+   $('hearts').textContent='♥ '.repeat(hearts).trim()+'♡ '.repeat(3-hearts);
+   $('progress').style.width=((arrows.length-remaining)/arrows.length*100)+'%';
+   const board=$('board');board.innerHTML='';
+   for(let r=0;r<7;r++)for(let c=0;c<7;c++){
+     const a=arrows.find(x=>x.alive&&x.r===r&&x.c===c);
+     const b=document.createElement('button');b.type='button';
+     b.className='cell '+(a?'':'empty');b.disabled=!a;
+     b.setAttribute('aria-label',a?'Arrow '+a.d:'Empty cell');
+     if(a){b.textContent=a.d;b.addEventListener('click',()=>move(a));}
+     else b.textContent='';
+     board.appendChild(b);
+   }
+ }
+ function move(a){
+   if(won||failed||!a.alive)return;
+   if(isBlocked(a)){
+     hearts--;say('Blocked. Find a different arrow to remove first.');
+     if(hearts<=0){failed=true;say('Out of hearts. Restart the level to try again.');}
+     render();return;
+   }
+   a.alive=false;
+   if(!arrows.some(x=>x.alive)){
+     won=true;say('Level complete. All arrows escaped.');$('next').style.display='block';
+     level++;localStorage.setItem('arrows-level',String(level));
+   }else say('Clear path. Nice move.');
+   render();
+ }
+ $('hint').addEventListener('click',()=>{
+   if(won||failed)return;
+   const a=arrows.find(x=>x.alive&&!isBlocked(x));
+   say(a?'Hint: try the '+a.d+' arrow in row '+(a.r+1)+', column '+(a.c+1)+'.':'No clear exits. Look for an arrow you can unblock.');
+ });
+ $('restart').addEventListener('click',createLevel);
+ $('next').addEventListener('click',createLevel);
+ createLevel();
+ if(!('serviceWorker' in navigator))$('installTip').style.display='block';
+ if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.navigator.standalone)$('installTip').style.display='block';
+ if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+})();
+</script>
+</body></html>
