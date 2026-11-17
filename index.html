@@ -3,119 +3,697 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b1019">
+<meta name="theme-color" content="#0a111b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Arrows">
+<meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Arrows — Path Puzzle</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1019;--surface:#121b29;--surface2:#172334;--line:#28394e;--text:#edf4fb;--muted:#8ea1b8;--blue:#8dd8f4;--blue2:#67aef0;--gold:#f2d49a;--danger:#ff9b9b;--radius:18px}
-*{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;min-height:100svh;color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(ellipse 85% 42% at 50% -10%,#1d3650 0%,transparent 72%),linear-gradient(180deg,#0d1521,#090e17 78%);-webkit-font-smoothing:antialiased}
-button{font:inherit}main{width:min(100%,650px);margin:0 auto;padding:calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 24px)}
-.topbar{display:flex;align-items:center;justify-content:space-between;margin:0 2px 20px}.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#203e59,#14263b);border:1px solid #5e8eae66;box-shadow:inset 0 1px #ffffff20}.brand-mark svg{width:23px;height:23px}.eyebrow{font-size:9px;letter-spacing:2.2px;font-weight:800;color:#8ca9c5;text-transform:uppercase;margin-bottom:3px}h1{font-size:21px;letter-spacing:-.7px;line-height:1;margin:0;font-weight:760}.level-pill{font-size:11px;letter-spacing:.8px;font-weight:750;color:#c8d8e9;padding:9px 12px;border-radius:999px;border:1px solid #3c536b;background:#152235}
-.scoreboard{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}.metric{padding:11px 12px 10px;border:1px solid #2a3b50;border-radius:14px;background:linear-gradient(145deg,#172538,#111b2a);min-width:0}.metric-label{display:block;color:#8197b0;font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}.metric-value{display:block;margin-top:4px;font-size:20px;line-height:1.05;font-weight:760;letter-spacing:-.6px;font-variant-numeric:tabular-nums}.progress-row{display:flex;justify-content:space-between;align-items:center;margin:0 2px 7px;color:#8fa4bc;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase}.progress-track{height:6px;background:#1a2a3c;border-radius:20px;overflow:hidden;border:1px solid #26394d;margin-bottom:15px}.progress-fill{height:100%;width:0;background:linear-gradient(90deg,#5da8eb,#8ce2ef);border-radius:20px;box-shadow:0 0 12px #6ac5f477;transition:width .32s ease}
-.instruction{margin:0 auto 13px;text-align:center;color:#a8bbce;font-size:12px;line-height:1.5}.board-shell{position:relative;padding:7px;border-radius:21px;background:linear-gradient(145deg,#243b53,#111d2d 48%,#1b2e43);border:1px solid #526d8655;box-shadow:0 22px 55px #0008,inset 0 1px #ffffff16}.board-shell:after{content:"";position:absolute;inset:0;border-radius:20px;pointer-events:none;box-shadow:inset 0 0 0 1px #d7efff08}.board{position:relative;display:grid;grid-template-columns:repeat(20,minmax(0,1fr));gap:3px;width:100%;aspect-ratio:1;isolation:isolate;overflow:visible;touch-action:manipulation}.cell{appearance:none;border:1px solid #31465b55;border-radius:3px;background:linear-gradient(145deg,#18283a,#142234);min-width:0;min-height:0;width:100%;height:100%;padding:0;pointer-events:none}.cell.filled{background:linear-gradient(145deg,#20354a,#192b3e);border-color:#4a668055}.arrow-layer{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible}.arrow-shape{fill:none;stroke:url(#shaftGradient);stroke-width:43;stroke-linecap:round;stroke-linejoin:round;filter:url(#shaftGlow)}.arrow-head{fill:url(#headGradient);stroke:#d9f4ff;stroke-width:1.2;stroke-linejoin:round;filter:url(#shaftGlow)}.arrow-hit{position:absolute;z-index:3;border:0;border-radius:4px;background:transparent;padding:0;touch-action:manipulation;cursor:pointer;-webkit-tap-highlight-color:transparent}.arrow-hit:focus-visible{outline:2px solid #e6f9ff;outline-offset:-3px}.arrow-hit:active{background:#d6f4ff25}.arrow-hit.hinted{background:#d6f4ff20;box-shadow:inset 0 0 0 1px #b8eaff88}.arrow-shape.hinted{stroke:#d9f5ff;filter:drop-shadow(0 0 8px #8de0ff)}
-.status{min-height:43px;display:flex;align-items:center;justify-content:center;text-align:center;color:#9fb3c9;font-size:12px;line-height:1.4;padding:8px 8px 4px}.status.good{color:#a8e6ce}.status.warn{color:#f0d39a}.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:7px}.control{min-height:45px;border:1px solid #344b63;border-radius:13px;background:linear-gradient(145deg,#1b2b40,#142235);color:#dbe8f5;font-size:12px;font-weight:750;letter-spacing:.2px;box-shadow:inset 0 1px #ffffff0b;cursor:pointer;transition:transform .15s,border-color .15s,background .15s}.control:active{transform:scale(.985)}.control:disabled{opacity:.42;cursor:default}.control.primary{grid-column:1/-1;color:#091726;border-color:#b4e8f5;background:linear-gradient(100deg,#a7e8f1,#85c7f2 60%,#b5d9ff);box-shadow:0 5px 20px #69bce933,inset 0 1px #ffffffaa}.help{margin-top:17px;padding:14px 15px;border:1px solid #26394e;border-radius:15px;background:#111c2a;color:#8fa4ba;font-size:11px;line-height:1.6}.help strong{display:block;color:#d6e5f3;font-size:10px;letter-spacing:1.1px;text-transform:uppercase;margin-bottom:4px}.help p{margin:0}.footer{text-align:center;color:#62778f;font-size:9px;letter-spacing:.4px;margin:13px 0 0}
-.spark{position:absolute;z-index:8;width:4px;height:4px;border-radius:50%;pointer-events:none;background:#dffaff;box-shadow:0 0 8px 2px #79d7ff;animation:spark .55s ease-out forwards}.spark.gold{background:#ffe5ad;box-shadow:0 0 9px 2px #f0c66f}@keyframes spark{0%{opacity:0;transform:translate(0,0) scale(.4)}15%{opacity:1}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(0)}}
-.completion{position:absolute;inset:7px;z-index:9;display:none;place-items:center;border-radius:15px;background:#07111bdc;backdrop-filter:blur(7px);text-align:center;padding:22px}.completion.show{display:grid}.completion-card{max-width:270px}.completion-kicker{color:#9bdff0;font-size:9px;font-weight:850;letter-spacing:2px;text-transform:uppercase}.completion h2{font-size:25px;letter-spacing:-.8px;margin:8px 0}.completion p{font-size:12px;line-height:1.5;color:#a9bed1;margin:0 0 17px}
-@media(min-width:560px){main{padding-top:26px}.board{gap:4px}.board-shell{padding:9px}.instruction{font-size:13px}}
-@media(max-width:380px){main{padding-left:11px;padding-right:11px}.board{gap:2px}.board-shell{padding:5px}.metric{padding:9px}.metric-value{font-size:18px}}
+:root{
+  color-scheme:dark;
+  --bg:#0a111b;
+  --panel:#111d2b;
+  --panel-raised:#172638;
+  --line:#293e54;
+  --text:#edf5fc;
+  --muted:#91a7bd;
+  --blue:#a1e3f5;
+  --blue-deep:#63b8e7;
+  --gold:#f0d19a;
+  --warning:#f0cf91;
+  --radius:16px;
+}
+*{box-sizing:border-box}
+html{min-height:100%;background:var(--bg)}
+body{
+  margin:0;
+  min-height:100vh;
+  min-height:100svh;
+  color:var(--text);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:radial-gradient(ellipse 90% 42% at 50% -12%,#1b3850 0%,transparent 72%),linear-gradient(180deg,#0c1622,#090f18 78%);
+  -webkit-font-smoothing:antialiased;
+  -webkit-text-size-adjust:100%;
+  overscroll-behavior-y:contain;
+}
+button{font:inherit}
+main{
+  width:min(100%,520px);
+  min-height:100vh;
+  min-height:100svh;
+  margin:0 auto;
+  padding:calc(env(safe-area-inset-top,0px) + 7px) 12px calc(env(safe-area-inset-bottom,0px) + 9px);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.topbar{display:flex;align-items:center;justify-content:space-between;min-height:38px;padding:0 2px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-mark{width:34px;height:34px;flex:0 0 auto;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,#23445e,#14283d);border:1px solid #75aac866;box-shadow:inset 0 1px #ffffff22}
+.brand-mark svg{width:21px;height:21px}
+.eyebrow{font-size:8px;letter-spacing:1.8px;font-weight:800;color:#91aec7;text-transform:uppercase;margin-bottom:3px}
+h1{font-size:19px;letter-spacing:1.1px;line-height:1;margin:0;font-weight:820}
+.level-pill{font-size:10px;letter-spacing:1px;font-weight:800;color:#d2e4f3;padding:8px 11px;border-radius:999px;border:1px solid #3b566f;background:#142337;white-space:nowrap}
+.scoreboard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.metric{min-width:0;padding:8px 10px 9px;border:1px solid #293e54;border-radius:13px;background:linear-gradient(145deg,#17283b,#111c2a)}
+.metric-label{display:block;color:#879fb6;font-size:8px;font-weight:800;letter-spacing:1.25px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.metric-value{display:block;margin-top:3px;font-size:19px;line-height:1.05;font-weight:780;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.progress-block{display:grid;gap:5px}
+.progress-row{display:flex;justify-content:space-between;align-items:center;color:#9bb0c4;font-size:9px;font-weight:750;letter-spacing:.8px;text-transform:uppercase;padding:0 2px}
+.progress-track{height:5px;background:#1a2b3d;border-radius:20px;overflow:hidden;border:1px solid #2a4056}
+.progress-fill{height:100%;width:0;background:linear-gradient(90deg,#64b6ed,#a0e6f2);border-radius:20px;box-shadow:0 0 12px #6ac5f477;transition:width .3s ease}
+.instruction{text-align:center;color:#a8bdcf;font-size:11px;line-height:1.35;margin:0;padding:0 4px}
+.board-shell{
+  position:relative;
+  width:min(100%,44svh,390px);
+  align-self:center;
+  padding:7px;
+  border-radius:20px;
+  background:linear-gradient(145deg,#29435c,#101d2c 50%,#1d344b);
+  border:1px solid #66829c66;
+  box-shadow:0 18px 44px #0009,inset 0 1px #ffffff20;
+  -webkit-user-select:none;
+  user-select:none;
+}
+.board-shell:after{content:"";position:absolute;inset:0;border-radius:19px;pointer-events:none;box-shadow:inset 0 0 0 1px #e1f5ff0b}
+.board{
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(15,minmax(0,1fr));
+  grid-template-rows:repeat(15,minmax(0,1fr));
+  width:100%;
+  aspect-ratio:1;
+  isolation:isolate;
+  overflow:hidden;
+  border-radius:11px;
+  background:#122235;
+  touch-action:manipulation;
+}
+.cell{min-width:0;min-height:0;background:linear-gradient(145deg,#172a3e,#142336);box-shadow:inset 0 0 0 1px #68849a22}
+.cell:nth-child(3n){background:linear-gradient(145deg,#192d42,#15263a)}
+.arrow-layer{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:hidden}
+.arrow-shape{fill:none;stroke:url(#shaftGradient);stroke-width:44;stroke-linecap:round;stroke-linejoin:round;filter:url(#shaftGlow)}
+.arrow-head{fill:url(#headGradient);stroke:#e4f8ff;stroke-width:1.3;stroke-linejoin:round;filter:url(#shaftGlow)}
+.hit-layer{position:absolute;inset:0;z-index:3;display:block;pointer-events:none}
+.arrow-hit{
+  position:absolute;
+  border:0;
+  border-radius:5px;
+  padding:0;
+  background:transparent;
+  pointer-events:auto;
+  touch-action:manipulation;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.arrow-hit:focus-visible{outline:2px solid #ecfbff;outline-offset:-3px}
+.arrow-hit:active{background:#d8f4ff26}
+.arrow-hit.hinted{background:#d6f4ff26;box-shadow:inset 0 0 0 1px #c7f0ff99}
+.arrow-shape.hinted{stroke:#dcf7ff;filter:drop-shadow(0 0 8px #8de0ff)}
+.status{min-height:29px;display:flex;align-items:center;justify-content:center;text-align:center;color:#a3b9cd;font-size:11px;line-height:1.3;padding:0 7px}
+.status.good{color:#a7e8d0}
+.status.warn{color:var(--warning)}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.control{min-height:43px;border:1px solid #38526c;border-radius:13px;background:linear-gradient(145deg,#1b3047,#142338);color:#e1edf7;font-size:11px;font-weight:800;letter-spacing:.3px;box-shadow:inset 0 1px #ffffff0c;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.control:active{transform:scale(.985)}
+.control:disabled{opacity:.42;cursor:default}
+.control.primary{color:#091725;border-color:#b5e9f4;background:linear-gradient(100deg,#a9eaf1,#81c8ef 62%,#b7ddff);box-shadow:0 5px 17px #69bce933,inset 0 1px #ffffffbb}
+.rules{align-self:stretch;margin-top:0;padding:8px 11px;border:1px solid #263a4f;border-radius:12px;background:#101b29;color:#91a8be;font-size:10px;line-height:1.5}
+.rules summary{cursor:pointer;color:#ccdeed;font-weight:750;letter-spacing:.3px;outline-offset:3px}
+.rules p{margin:7px 0 0}
+.completion{position:absolute;inset:7px;z-index:9;display:none;place-items:center;border-radius:13px;background:#07121cE8;backdrop-filter:blur(7px);text-align:center;padding:18px}
+.completion.show{display:grid}
+.completion-card{max-width:260px}
+.completion-kicker{color:#9bdff0;font-size:9px;font-weight:850;letter-spacing:2px;text-transform:uppercase}
+.completion h2{font-size:24px;letter-spacing:-.8px;margin:8px 0}
+.completion p{font-size:11px;line-height:1.5;color:#abc0d3;margin:0 0 15px}
+.spark{position:absolute;z-index:10;width:4px;height:4px;border-radius:50%;pointer-events:none;background:#dffaff;box-shadow:0 0 8px 2px #79d7ff;animation:spark .55s ease-out forwards}
+.spark.gold{background:#ffe5ad;box-shadow:0 0 9px 2px #f0c66f}
+@keyframes spark{0%{opacity:0;transform:translate(0,0) scale(.4)}15%{opacity:1}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(0)}}
+@media(max-width:380px){main{padding-left:9px;padding-right:9px;gap:7px}.board-shell{padding:6px}.metric{padding:7px 8px 8px}.metric-value{font-size:18px}.instruction{font-size:10px}}
+@media(max-height:760px){.board-shell{width:min(100%,40svh,350px)}main{gap:6px}.rules{padding:6px 10px}}
+@media(min-width:700px){main{padding-top:26px}.board-shell{width:min(100%,390px)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
 <main>
- <header class="topbar">
-  <div class="brand"><div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#bceeff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18V8h8V4m0 0-4 4m4-4 4 4M12 8h7v8"/><path d="m15 13 4 4 4-4"/></svg></div><div><div class="eyebrow">A path-clearing puzzle</div><h1>ARROWS</h1></div></div>
-  <div class="level-pill" id="levelPill">LEVEL 01</div>
- </header>
- <section class="scoreboard" aria-label="Game statistics">
-  <div class="metric"><span class="metric-label">Arrows left</span><strong class="metric-value" id="left">—</strong></div>
-  <div class="metric"><span class="metric-label">Moves</span><strong class="metric-value" id="moves">0</strong></div>
-  <div class="metric"><span class="metric-label">Board clear</span><strong class="metric-value" id="percent">0%</strong></div>
- </section>
- <div class="progress-row"><span>Level progress</span><span id="progressLabel">0% cleared</span></div>
- <div class="progress-track" role="progressbar" aria-label="Level progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack"><div class="progress-fill" id="progress"></div></div>
- <p class="instruction">Select any part of an arrow. Its full path will follow the bends and leave through the arrowhead.</p>
- <section class="board-shell" aria-label="Puzzle">
-  <div id="board" class="board" aria-label="20 by 20 puzzle grid"></div>
-  <div class="completion" id="completion"><div class="completion-card"><div class="completion-kicker">Board cleared</div><h2>Path complete.</h2><p id="completionText">Every arrow has found its way out.</p><button class="control primary" id="next">Next level</button></div></div>
- </section>
- <div class="status" id="status" role="status" aria-live="polite">Clear the arrows by finding an unobstructed exit.</div>
- <div class="controls"><button class="control" id="hint">Show a move</button><button class="control" id="restart">Restart level</button></div>
- <aside class="help"><strong>How to play</strong><p>Tap any segment of an arrow to select the entire piece. An arrow can leave when every cell straight ahead of its head is empty. Other arrows may block the exit; clear those first. The board is guaranteed to have a solution.</p></aside>
- <p class="footer">YOUR PROGRESS IS SAVED ON THIS DEVICE · 20 × 20 GRID</p>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#c3efff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18V8h8V4m0 0-4 4m4-4 4 4M12 8h7v8"/><path d="m15 13 4 4 4-4"/></svg>
+      </div>
+      <div><div class="eyebrow">Path-clearing puzzle</div><h1>ARROWS</h1></div>
+    </div>
+    <div class="level-pill" id="levelPill">LEVEL 01</div>
+  </header>
+
+  <section class="scoreboard" aria-label="Game statistics">
+    <div class="metric"><span class="metric-label">Arrows left</span><strong class="metric-value" id="left">—</strong></div>
+    <div class="metric"><span class="metric-label">Moves</span><strong class="metric-value" id="moves">0</strong></div>
+    <div class="metric"><span class="metric-label">Board clear</span><strong class="metric-value" id="percent">0%</strong></div>
+  </section>
+
+  <div class="progress-block">
+    <div class="progress-row"><span>Level progress</span><span id="progressLabel">0% cleared</span></div>
+    <div class="progress-track" id="progressTrack" role="progressbar" aria-label="Level progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-fill" id="progress"></div></div>
+  </div>
+
+  <p class="instruction">Tap any part of an arrow. Its entire winding path must have a clear exit.</p>
+
+  <section class="board-shell" aria-label="Puzzle board">
+    <div id="board" class="board" role="group" aria-label="15 by 15 puzzle grid"></div>
+    <div class="completion" id="completion">
+      <div class="completion-card">
+        <div class="completion-kicker">Board cleared</div>
+        <h2>Path complete.</h2>
+        <p id="completionText">Every arrow has found its way out.</p>
+        <button class="control primary" id="next">Next level</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="status" id="status" role="status" aria-live="polite">Find an arrow with an unobstructed lane ahead.</div>
+  <div class="controls">
+    <button class="control primary" id="hint">Show a move</button>
+    <button class="control" id="restart">Restart level</button>
+  </div>
+  <details class="rules">
+    <summary>How to play</summary>
+    <p>Tap any segment, including the tail or body, to select that entire arrow. It can leave only when every cell in front of its head is empty. Blocked taps do not cost a move. Every board is generated with a valid solution.</p>
+  </details>
 </main>
 <script>
 (()=>{
- 'use strict';
- const $=id=>document.getElementById(id),N=20,DIRS={'↑':[-1,0],'↓':[1,0],'←':[0,-1],'→':[0,1]};
- const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
- let level=Math.max(0,Number(localStorage.getItem('arrows-level')||0)),arrows=[],moves=0,animating=false,won=false,hintedId=null,runToken=0;
- const key=(r,c)=>r+','+c;
- function rng(seed){let x=seed>>>0;return()=>{x=(x+0x6D2B79F5)>>>0;let t=x;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
- function shuffle(a,rand){for(let i=a.length-1;i>0;i--){const j=Math.floor(rand()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
- function buildPuzzle(lv){
-  const rand=rng(982451653+lv*104729),occupied=new Set(),placed=[],directions=shuffle(['↑','↓','←','→'],rand);
-  const target=Math.min(320,278+Math.min(42,lv*2)),maxPieces=76;let attempts=0;
-  while(occupied.size<target&&placed.length<maxPieces&&attempts<100000){
-   attempts++;const d=directions[Math.floor(rand()*4)],[dr,dc]=DIRS[d],hr=Math.floor(rand()*N),hc=Math.floor(rand()*N);
-   let exitOpen=true;for(let r=hr+dr,c=hc+dc;r>=0&&r<N&&c>=0&&c<N;r+=dr,c+=dc)if(occupied.has(key(r,c))){exitOpen=false;break}
-   if(!exitOpen||occupied.has(key(hr,hc)))continue;
-   const len=5+Math.floor(rand()*7),path=[[hr,hc]];let r=hr,c=hc,vr=-dr,vc=-dc,turns=0,valid=true;
-   for(let i=1;i<len;i++){
-    // A weighted random walk creates long straight runs interrupted by one or more right-angle turns.
-    if(i>1&&rand()<(turns===0?.28:.12)){
-     if(vr!==0){const sign=rand()<.5?-1:1;vr=0;vc=sign}else{const sign=rand()<.5?-1:1;vc=0;vr=sign}turns++;
+  'use strict';
+
+  const N = 15;
+  const MIN_ARROW_CELLS = 6;
+  const DIRECTIONS = {
+    '↑': [-1, 0],
+    '↓': [1, 0],
+    '←': [0, -1],
+    '→': [0, 1]
+  };
+  const DIRECTION_NAMES = {'↑':'up','↓':'down','←':'left','→':'right'};
+  const $ = id => document.getElementById(id);
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let level = Math.max(0, Number(localStorage.getItem('arrows-level') || 0));
+  let arrows = [];
+  let moves = 0;
+  let animating = false;
+  let won = false;
+  let hintedId = null;
+  let animationToken = 0;
+
+  const cellKey = (r, c) => `${r},${c}`;
+
+  function seededRandom(seed) {
+    let x = seed >>> 0;
+    return () => {
+      x = (x + 0x6D2B79F5) >>> 0;
+      let t = x;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function shuffle(items, random) {
+    const result = items.slice();
+    for (let i = result.length - 1; i > 0; i--) {
+      const j = Math.floor(random() * (i + 1));
+      [result[i], result[j]] = [result[j], result[i]];
     }
-    r+=vr;c+=vc;if(r<0||r>=N||c<0||c>=N||occupied.has(key(r,c))||path.some(([rr,cc])=>rr===r&&cc===c)){valid=false;break}path.push([r,c]);
-   }
-   if(!valid)continue;
-   const cells=path.slice().reverse(),a={id:placed.length,r:hr,c:hc,d,cells,alive:true};placed.push(a);for(const [rr,cc] of cells)occupied.add(key(rr,cc));
+    return result;
   }
-  // Placement order guarantees a solution: the most recently placed arrow has a clear exit first.
-  return placed;
- }
- function say(message,type=''){const el=$('status');el.textContent=message;el.className='status'+(type?' '+type:'')}
- function occupancy(except){const map=new Map();for(const a of arrows){if(!a.alive||a===except)continue;for(const [r,c] of a.cells)map.set(key(r,c),a)}return map}
- function blocker(a){const [dr,dc]=DIRS[a.d],occ=occupancy(a);for(let r=a.r+dr,c=a.c+dc;r>=0&&r<N&&c>=0&&c<N;r+=dr,c+=dc){const hit=occ.get(key(r,c));if(hit)return hit}return null}
- function stats(){const live=arrows.filter(a=>a.alive),total=arrows.reduce((n,a)=>n+a.cells.length,0),remaining=live.reduce((n,a)=>n+a.cells.length,0),pct=total?Math.round((total-remaining)/total*100):100;$('left').textContent=live.length;$('moves').textContent=moves;$('percent').textContent=pct+'%';$('progress').style.width=pct+'%';$('progressLabel').textContent=pct+'% cleared';$('progressTrack').setAttribute('aria-valuenow',String(pct))}
- function render(){
-  const board=$('board');board.innerHTML='';const rect=board.getBoundingClientRect(),gap=parseFloat(getComputedStyle(board).columnGap)||0,pitch=(rect.width-gap*(N-1))/N,unit=pitch/rect.width*100;
-  for(let i=0;i<N*N;i++){const cell=document.createElement('div');cell.className='cell';cell.setAttribute('aria-hidden','true');board.appendChild(cell)}
-  const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');svg.setAttribute('class','arrow-layer');svg.setAttribute('viewBox','0 0 2000 2000');svg.setAttribute('preserveAspectRatio','none');
-  const defs=document.createElementNS(ns,'defs');defs.innerHTML='<linearGradient id="shaftGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d7f5ff"/><stop offset="52%" stop-color="#91d9f2"/><stop offset="100%" stop-color="#78aee8"/></linearGradient><linearGradient id="headGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f2fdff"/><stop offset="100%" stop-color="#8ccaf1"/></linearGradient><filter id="shaftGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
-  svg.appendChild(defs);board.appendChild(svg);const center=(r,c)=>[50+c*100,50+r*100];
-  for(const a of arrows){if(!a.alive)continue;const pts=a.cells.map(([r,c])=>center(r,c)),[hx,hy]=pts[pts.length-1],[px,py]=pts[pts.length-2],base=[hx+(px-hx)*.34,hy+(py-hy)*.34];pts[pts.length-1]=base;
-   const line=document.createElementNS(ns,'path');line.setAttribute('d',pts.map(([x,y],i)=>(i?'L ':'M ')+x+' '+y).join(' '));line.setAttribute('class','arrow-shape'+(a.id===hintedId?' hinted':''));line.dataset.id=a.id;svg.appendChild(line);
-   const tip=document.createElementNS(ns,'polygon');tip.setAttribute('points',headPoints(hx,hy,a.d).map(p=>p.join(',')).join(' '));tip.setAttribute('class','arrow-head');tip.dataset.id=a.id;svg.appendChild(tip);
-   for(const [r,c] of a.cells){const hit=document.createElement('button');hit.type='button';hit.className='arrow-hit'+(a.id===hintedId?' hinted':'');hit.style.left=(c*(pitch+gap)/rect.width*100)+'%';hit.style.top=(r*(pitch+gap)/rect.width*100)+'%';hit.style.width=unit+'%';hit.style.height=unit+'%';hit.setAttribute('aria-label',`Select ${a.d} arrow, ${a.cells.length} segments`);hit.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();selectArrow(a)});board.appendChild(hit)}
+
+  function buildCandidate(currentLevel, seed) {
+    const random = seededRandom(seed);
+    const occupied = new Set();
+    const placed = [];
+    const targetCells = Math.min(180, 148 + Math.min(16, currentLevel) * 2);
+    const maxPieces = 30;
+    const maxAttempts = 26000;
+    const maxLength = Math.min(13, 12 + Math.floor(currentLevel / 8));
+    const turnChance = [
+      Math.min(0.68, 0.56 + currentLevel * 0.006),
+      Math.min(0.46, 0.34 + currentLevel * 0.004),
+      Math.min(0.30, 0.18 + currentLevel * 0.003),
+      0.08
+    ];
+    const directions = shuffle(Object.keys(DIRECTIONS), random);
+    let attempts = 0;
+
+    while (occupied.size < targetCells && placed.length < maxPieces && attempts < maxAttempts) {
+      attempts++;
+      const direction = directions[Math.floor(random() * directions.length)];
+      const [dr, dc] = DIRECTIONS[direction];
+      const headRow = Math.floor(random() * N);
+      const headCol = Math.floor(random() * N);
+
+      // The new arrow's exit lane must be empty at the moment it is placed.
+      let exitIsClear = true;
+      for (let r = headRow + dr, c = headCol + dc; r >= 0 && r < N && c >= 0 && c < N; r += dr, c += dc) {
+        if (occupied.has(cellKey(r, c))) {
+          exitIsClear = false;
+          break;
+        }
+      }
+      if (!exitIsClear || occupied.has(cellKey(headRow, headCol))) continue;
+
+      const length = MIN_ARROW_CELLS + Math.floor(random() * (maxLength - MIN_ARROW_CELLS + 1));
+      const pathHeadToTail = [[headRow, headCol]];
+      const pathKeys = new Set([cellKey(headRow, headCol)]);
+      let r = headRow;
+      let c = headCol;
+      let vr = -dr;
+      let vc = -dc;
+      let turns = 0;
+      let valid = true;
+
+      // Paths are generated from head toward tail. Every accepted arrow has
+      // at least two right-angle turns and at least six distinct cells.
+      for (let i = 1; i < length; i++) {
+        if (i > 1 && turns < 4 && random() < turnChance[turns]) {
+          if (vr !== 0) {
+            const sign = random() < 0.5 ? -1 : 1;
+            vr = 0;
+            vc = sign;
+          } else {
+            const sign = random() < 0.5 ? -1 : 1;
+            vc = 0;
+            vr = sign;
+          }
+          turns++;
+        }
+
+        r += vr;
+        c += vc;
+        const key = cellKey(r, c);
+        if (r < 0 || r >= N || c < 0 || c >= N || occupied.has(key) || pathKeys.has(key)) {
+          valid = false;
+          break;
+        }
+        pathHeadToTail.push([r, c]);
+        pathKeys.add(key);
+      }
+
+      if (!valid || turns < 2 || pathHeadToTail.length < MIN_ARROW_CELLS) continue;
+
+      const arrow = {
+        id: placed.length,
+        row: headRow,
+        col: headCol,
+        direction,
+        turns,
+        cells: pathHeadToTail.reverse(), // Stored tail to head.
+        alive: true
+      };
+      placed.push(arrow);
+      for (const [cellRow, cellCol] of arrow.cells) occupied.add(cellKey(cellRow, cellCol));
+    }
+
+    return {arrows: placed, occupied: occupied.size, attempts};
   }
-  stats();
- }
- function headPoints(x,y,d){if(d==='→')return[[x+48,y],[x-17,y-39],[x-17,y+39]];if(d==='←')return[[x-48,y],[x+17,y-39],[x+17,y+39]];if(d==='↑')return[[x,y-48],[x-39,y+17],[x+39,y+17]];return[[x,y+48],[x-39,y-17],[x+39,y-17]]}
- function sample(points,distance){if(distance<=0)return points[0];for(let i=0;i<points.length-1;i++){const a=points[i],b=points[i+1],len=Math.hypot(b[0]-a[0],b[1]-a[1]);if(distance<=len){const t=distance/len;return[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]}distance-=len}const last=points.at(-1),prev=points.at(-2)||last,dx=last[0]-prev[0],dy=last[1]-prev[1],m=Math.hypot(dx,dy)||1;return[last[0]+dx/m*distance,last[1]+dy/m*distance]}
- function blockedMessage(){say('That exit is blocked by another arrow. Clear the blocking arrow first.','warn')}
- async function selectArrow(a){if(won||animating||!a.alive)return;hintedId=null;const b=blocker(a);if(b){blockedMessage();return}await animateExit(a)}
- function animateExit(a){
-  animating=true;$('hint').disabled=true;$('restart').disabled=true;const token=++runToken,board=$('board'),svg=board.querySelector('svg'),line=svg?.querySelector(`.arrow-shape[data-id="${a.id}"]`),head=svg?.querySelector(`.arrow-head[data-id="${a.id}"]`);if(!line||!head){animating=false;$('hint').disabled=false;$('restart').disabled=false;return Promise.resolve()}
-  const ns='http://www.w3.org/2000/svg',group=document.createElementNS(ns,'g'),movingLine=line.cloneNode(true),movingHead=head.cloneNode(true);movingLine.removeAttribute('data-id');movingHead.removeAttribute('data-id');group.append(movingLine,movingHead);svg.appendChild(group);line.style.opacity='0';head.style.opacity='0';
-  const route=a.cells.map(([r,c])=>[50+c*100,50+r*100]),[dr,dc]=DIRS[a.d],headPoint=route.at(-1),exitCells=(dc>0?N-a.c:dc<0?a.c+1:dr>0?N-a.r:a.r+1),count=a.cells.length;
-  for(let i=1;i<=exitCells+count+2;i++)route.push([headPoint[0]+dc*100*i,headPoint[1]+dr*100*i]);
-  const duration=reducedMotion?1:Math.min(1900,720+(exitCells+count)*24),start=performance.now();say('Arrow moving through its path…');moves++;
-  return new Promise(resolve=>{let settled=false;const finish=()=>{if(settled)return;settled=true;if(token===runToken){a.alive=false;animating=false;hintedId=null;group.remove();if(arrows.every(x=>!x.alive)){won=true;localStorage.setItem('arrows-level',String(level+1));$('completionText').textContent=`Level ${level+1} cleared in ${moves} moves.`;$('completion').classList.add('show');say('All arrows cleared.','good');celebrate()}else say('Arrow cleared. Find the next open exit.','good');$('hint').disabled=false;$('restart').disabled=false;render()}resolve()};
-   function frame(now){if(token!==runToken){finish();return}const t=Math.min(1,(now-start)/duration),distance=t*(exitCells+count+1)*100,pts=[];for(let i=0;i<count;i++)pts.push(sample(route,i*100+distance));const tip=sample(route,(count-1)*100+distance);if(pts.length>1){const p=pts[pts.length-2],q=pts[pts.length-1];pts[pts.length-1]=[q[0]+(p[0]-q[0])*.34,q[1]+(p[1]-q[1])*.34]}movingLine.setAttribute('d',pts.map(([x,y],i)=>(i?'L ':'M ')+x+' '+y).join(' '));movingHead.setAttribute('points',headPoints(tip[0],tip[1],a.d).map(p=>p.join(',')).join(' '));if(t<1)requestAnimationFrame(frame);else finish()}
-   requestAnimationFrame(frame);
+
+  function countOpenMoves(boardArrows) {
+    const map = new Map();
+    for (const arrow of boardArrows) {
+      for (const [r, c] of arrow.cells) map.set(cellKey(r, c), arrow);
+    }
+    let count = 0;
+    for (const arrow of boardArrows) {
+      const [dr, dc] = DIRECTIONS[arrow.direction];
+      let blocked = false;
+      for (let r = arrow.row + dr, c = arrow.col + dc; r >= 0 && r < N && c >= 0 && c < N; r += dr, c += dc) {
+        if (map.has(cellKey(r, c)) && map.get(cellKey(r, c)) !== arrow) {
+          blocked = true;
+          break;
+        }
+      }
+      if (!blocked) count++;
+    }
+    return count;
+  }
+
+  function verifySolution(boardArrows) {
+    // Placement order gives a guaranteed solution in reverse. Verify it
+    // before exposing the board to the player.
+    const remaining = new Set(boardArrows);
+    for (let i = boardArrows.length - 1; i >= 0; i--) {
+      const arrow = boardArrows[i];
+      const [dr, dc] = DIRECTIONS[arrow.direction];
+      for (let r = arrow.row + dr, c = arrow.col + dc; r >= 0 && r < N && c >= 0 && c < N; r += dr, c += dc) {
+        for (const other of remaining) {
+          if (other === arrow) continue;
+          if (other.cells.some(([rr, cc]) => rr === r && cc === c)) return false;
+        }
+      }
+      remaining.delete(arrow);
+    }
+    return boardArrows.every(arrow => arrow.cells.length >= MIN_ARROW_CELLS && arrow.turns >= 2);
+  }
+
+  function buildPuzzle(currentLevel) {
+    let best = null;
+    const baseSeed = 982451653 + (currentLevel + 1) * 104729;
+
+    // Generate several deterministic candidates and keep the denser board
+    // with fewer immediately available exits. This raises the puzzle's
+    // decision difficulty without sacrificing solvability.
+    for (let variant = 0; variant < 4; variant++) {
+      const candidate = buildCandidate(currentLevel, baseSeed + variant * 5432101);
+      const openMoves = countOpenMoves(candidate.arrows);
+      const turns = candidate.arrows.reduce((sum, arrow) => sum + arrow.turns, 0);
+      const score = candidate.occupied - openMoves * 4 + turns * 0.35;
+      candidate.openMoves = openMoves;
+      candidate.score = score;
+      if (!best || score > best.score) best = candidate;
+    }
+
+    if (!best || best.arrows.length < 5 || !verifySolution(best.arrows)) {
+      throw new Error('Unable to generate a valid puzzle for this level.');
+    }
+    return best.arrows;
+  }
+
+  function say(message, type = '') {
+    const status = $('status');
+    status.textContent = message;
+    status.className = `status${type ? ` ${type}` : ''}`;
+  }
+
+  function occupancyMap(except = null) {
+    const map = new Map();
+    for (const arrow of arrows) {
+      if (!arrow.alive || arrow === except) continue;
+      for (const [r, c] of arrow.cells) map.set(cellKey(r, c), arrow);
+    }
+    return map;
+  }
+
+  function findBlocker(arrow, map = occupancyMap(arrow)) {
+    const [dr, dc] = DIRECTIONS[arrow.direction];
+    for (let r = arrow.row + dr, c = arrow.col + dc; r >= 0 && r < N && c >= 0 && c < N; r += dr, c += dc) {
+      const blocker = map.get(cellKey(r, c));
+      if (blocker) return blocker;
+    }
+    return null;
+  }
+
+  function stats() {
+    const live = arrows.filter(arrow => arrow.alive);
+    const totalCells = arrows.reduce((sum, arrow) => sum + arrow.cells.length, 0);
+    const remainingCells = live.reduce((sum, arrow) => sum + arrow.cells.length, 0);
+    const cleared = totalCells ? Math.round((totalCells - remainingCells) / totalCells * 100) : 100;
+
+    $('left').textContent = live.length;
+    $('moves').textContent = moves;
+    $('percent').textContent = `${cleared}%`;
+    $('progress').style.width = `${cleared}%`;
+    $('progressLabel').textContent = `${cleared}% cleared`;
+    $('progressTrack').setAttribute('aria-valuenow', String(cleared));
+  }
+
+  function render() {
+    const board = $('board');
+    board.innerHTML = '';
+
+    for (let i = 0; i < N * N; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.setAttribute('aria-hidden', 'true');
+      board.appendChild(cell);
+    }
+
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('class', 'arrow-layer');
+    svg.setAttribute('viewBox', `0 0 ${N * 100} ${N * 100}`);
+    svg.setAttribute('preserveAspectRatio', 'none');
+
+    const defs = document.createElementNS(svgNS, 'defs');
+    defs.innerHTML = `
+      <linearGradient id="shaftGradient" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#e1f8ff"/>
+        <stop offset="52%" stop-color="#9bdcf4"/>
+        <stop offset="100%" stop-color="#74b4e9"/>
+      </linearGradient>
+      <linearGradient id="headGradient" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f5fdff"/>
+        <stop offset="100%" stop-color="#8cccf1"/>
+      </linearGradient>
+      <filter id="shaftGlow" x="-45%" y="-45%" width="190%" height="190%">
+        <feGaussianBlur stdDeviation="3.5" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>`;
+    svg.appendChild(defs);
+    board.appendChild(svg);
+
+    const center = (r, c) => [50 + c * 100, 50 + r * 100];
+    const hitLayer = document.createElement('div');
+    hitLayer.className = 'hit-layer';
+    hitLayer.setAttribute('aria-label', 'Arrow selection targets');
+
+    for (const arrow of arrows) {
+      if (!arrow.alive) continue;
+      const points = arrow.cells.map(([r, c]) => center(r, c));
+      const [headX, headY] = points[points.length - 1];
+      const [previousX, previousY] = points[points.length - 2];
+      points[points.length - 1] = [headX + (previousX - headX) * 0.34, headY + (previousY - headY) * 0.34];
+
+      const shaft = document.createElementNS(svgNS, 'path');
+      shaft.setAttribute('d', points.map(([x, y], index) => `${index ? 'L' : 'M'} ${x} ${y}`).join(' '));
+      shaft.setAttribute('class', `arrow-shape${arrow.id === hintedId ? ' hinted' : ''}`);
+      shaft.dataset.id = String(arrow.id);
+      svg.appendChild(shaft);
+
+      const head = document.createElementNS(svgNS, 'polygon');
+      head.setAttribute('points', arrowHeadPoints(headX, headY, arrow.direction).map(point => point.join(',')).join(' '));
+      head.setAttribute('class', 'arrow-head');
+      head.dataset.id = String(arrow.id);
+      svg.appendChild(head);
+
+      for (const [r, c] of arrow.cells) {
+        const hit = document.createElement('button');
+        hit.type = 'button';
+        hit.className = `arrow-hit${arrow.id === hintedId ? ' hinted' : ''}`;
+        hit.style.left = `${c / N * 100}%`;
+        hit.style.top = `${r / N * 100}%`;
+        hit.style.width = `${100 / N}%`;
+        hit.style.height = `${100 / N}%`;
+        hit.setAttribute('aria-label', `Select ${DIRECTION_NAMES[arrow.direction]} arrow, ${arrow.cells.length} segments`);
+        hit.addEventListener('click', event => {
+          event.preventDefault();
+          event.stopPropagation();
+          selectArrow(arrow);
+        });
+        hitLayer.appendChild(hit);
+      }
+    }
+
+    board.appendChild(hitLayer);
+    stats();
+  }
+
+  function arrowHeadPoints(x, y, direction) {
+    if (direction === '→') return [[x + 48, y], [x - 18, y - 39], [x - 18, y + 39]];
+    if (direction === '←') return [[x - 48, y], [x + 18, y - 39], [x + 18, y + 39]];
+    if (direction === '↑') return [[x, y - 48], [x - 39, y + 18], [x + 39, y + 18]];
+    return [[x, y + 48], [x - 39, y - 18], [x + 39, y - 18]];
+  }
+
+  function samplePolyline(points, distance) {
+    if (distance <= 0) return points[0];
+    for (let i = 0; i < points.length - 1; i++) {
+      const a = points[i];
+      const b = points[i + 1];
+      const segmentLength = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      if (distance <= segmentLength) {
+        const t = distance / segmentLength;
+        return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+      }
+      distance -= segmentLength;
+    }
+    const last = points[points.length - 1];
+    const previous = points[points.length - 2] || last;
+    const dx = last[0] - previous[0];
+    const dy = last[1] - previous[1];
+    const length = Math.hypot(dx, dy) || 1;
+    return [last[0] + dx / length * distance, last[1] + dy / length * distance];
+  }
+
+  function blockedMessage(blocker) {
+    say(`Exit blocked. Clear the ${DIRECTION_NAMES[blocker.direction]} arrow ahead first.`, 'warn');
+  }
+
+  function selectArrow(arrow) {
+    if (won || animating || !arrow.alive) return;
+    hintedId = null;
+    const blocker = findBlocker(arrow);
+    if (blocker) {
+      blockedMessage(blocker);
+      return;
+    }
+    animateExit(arrow);
+  }
+
+  function animateExit(arrow) {
+    animating = true;
+    $('hint').disabled = true;
+    $('restart').disabled = true;
+
+    const token = ++animationToken;
+    const board = $('board');
+    const svg = board.querySelector('svg');
+    const shaft = svg?.querySelector(`.arrow-shape[data-id="${arrow.id}"]`);
+    const head = svg?.querySelector(`.arrow-head[data-id="${arrow.id}"]`);
+    if (!svg || !shaft || !head) {
+      animating = false;
+      $('hint').disabled = false;
+      $('restart').disabled = false;
+      say('The arrow could not be animated. Try again.', 'warn');
+      return;
+    }
+
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const group = document.createElementNS(svgNS, 'g');
+    const movingShaft = shaft.cloneNode(true);
+    const movingHead = head.cloneNode(true);
+    movingShaft.removeAttribute('data-id');
+    movingHead.removeAttribute('data-id');
+    group.append(movingShaft, movingHead);
+    svg.appendChild(group);
+    shaft.style.opacity = '0';
+    head.style.opacity = '0';
+
+    const route = arrow.cells.map(([r, c]) => [50 + c * 100, 50 + r * 100]);
+    const [dr, dc] = DIRECTIONS[arrow.direction];
+    const headPoint = route[route.length - 1];
+    const exitCells = dc > 0 ? N - arrow.col : dc < 0 ? arrow.col + 1 : dr > 0 ? N - arrow.row : arrow.row + 1;
+    const arrowLength = arrow.cells.length;
+
+    for (let i = 1; i <= exitCells + arrowLength + 2; i++) {
+      route.push([headPoint[0] + dc * 100 * i, headPoint[1] + dr * 100 * i]);
+    }
+
+    const duration = reducedMotion ? 1 : Math.min(1750, 680 + (exitCells + arrowLength) * 26);
+    const startTime = performance.now();
+    say('Arrow moving through its path…');
+
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      if (token === animationToken) {
+        arrow.alive = false;
+        moves++;
+        animating = false;
+        hintedId = null;
+        group.remove();
+
+        if (arrows.every(item => !item.alive)) {
+          won = true;
+          localStorage.setItem('arrows-level', String(level + 1));
+          $('completionText').textContent = `Level ${level + 1} cleared in ${moves} moves.`;
+          $('completion').classList.add('show');
+          say('All arrows cleared.', 'good');
+          celebrate();
+        } else {
+          say('Arrow cleared. Find the next open exit.', 'good');
+        }
+        $('hint').disabled = false;
+        $('restart').disabled = false;
+        render();
+      }
+    };
+
+    function frame(now) {
+      if (token !== animationToken) {
+        finish();
+        return;
+      }
+      const t = Math.min(1, (now - startTime) / duration);
+      const distance = t * (exitCells + arrowLength + 1) * 100;
+      const points = [];
+      for (let i = 0; i < arrowLength; i++) points.push(samplePolyline(route, i * 100 + distance));
+      const tip = samplePolyline(route, (arrowLength - 1) * 100 + distance);
+
+      if (points.length > 1) {
+        const previous = points[points.length - 2];
+        const last = points[points.length - 1];
+        points[points.length - 1] = [last[0] + (previous[0] - last[0]) * 0.34, last[1] + (previous[1] - last[1]) * 0.34];
+      }
+      movingShaft.setAttribute('d', points.map(([x, y], index) => `${index ? 'L' : 'M'} ${x} ${y}`).join(' '));
+      movingHead.setAttribute('points', arrowHeadPoints(tip[0], tip[1], arrow.direction).map(point => point.join(',')).join(' '));
+
+      if (t < 1) requestAnimationFrame(frame);
+      else finish();
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function celebrate() {
+    const shell = document.querySelector('.board-shell');
+    const rect = shell.getBoundingClientRect();
+    for (let i = 0; i < 22; i++) {
+      const spark = document.createElement('i');
+      spark.className = `spark${i % 5 === 0 ? ' gold' : ''}`;
+      spark.style.left = `${rect.width / 2}px`;
+      spark.style.top = `${rect.height / 2}px`;
+      const angle = Math.PI * 2 * i / 22;
+      const distance = 34 + Math.random() * 58;
+      spark.style.setProperty('--x', `${Math.cos(angle) * distance}px`);
+      spark.style.setProperty('--y', `${Math.sin(angle) * distance}px`);
+      shell.appendChild(spark);
+      setTimeout(() => spark.remove(), 650);
+    }
+  }
+
+  function createLevel(nextLevel = level) {
+    animationToken++;
+    animating = false;
+    level = Math.max(0, Number(nextLevel) || 0);
+    arrows = buildPuzzle(level);
+    moves = 0;
+    won = false;
+    hintedId = null;
+    $('completion').classList.remove('show');
+    $('hint').disabled = false;
+    $('restart').disabled = false;
+    $('levelPill').textContent = `LEVEL ${String(level + 1).padStart(2, '0')}`;
+    localStorage.setItem('arrows-level', String(level));
+    say('Find an arrow with a clear lane ahead.');
+    render();
+  }
+
+  $('hint').addEventListener('click', () => {
+    if (won || animating) return;
+    const available = arrows.filter(arrow => arrow.alive && !findBlocker(arrow));
+    if (!available.length) {
+      say('No open exit is available. Restart this level to reset the board.', 'warn');
+      return;
+    }
+    const arrow = available.sort((a, b) => b.cells.length - a.cells.length)[0];
+    hintedId = arrow.id;
+    render();
+    say(`Try the ${DIRECTION_NAMES[arrow.direction]} arrow with ${arrow.cells.length} segments.`, 'good');
   });
- }
- function celebrate(){const shell=document.querySelector('.board-shell'),r=shell.getBoundingClientRect();for(let i=0;i<22;i++){const s=document.createElement('i');s.className='spark'+(i%5===0?' gold':'');s.style.left=(r.width/2)+'px';s.style.top=(r.height/2)+'px';const a=Math.PI*2*i/22,d=35+Math.random()*65;s.style.setProperty('--x',Math.cos(a)*d+'px');s.style.setProperty('--y',Math.sin(a)*d+'px');shell.appendChild(s);setTimeout(()=>s.remove(),650)}}
- function createLevel(){runToken++;animating=false;level=Math.max(0,Number(localStorage.getItem('arrows-level')||0));arrows=buildPuzzle(level);moves=0;won=false;hintedId=null;$('completion').classList.remove('show');$('hint').disabled=false;$('restart').disabled=false;$('levelPill').textContent='LEVEL '+String(level+1).padStart(2,'0');say('Find an arrow with a clear path beyond its head.');render()}
- $('hint').addEventListener('click',()=>{if(won||animating)return;const a=arrows.find(x=>x.alive&&!blocker(x));if(!a){say('No open exit found. The board state needs a reset.','warn');return}hintedId=a.id;render();say(`Try the ${a.d} arrow with ${a.cells.length} segments.`,'good')});
- $('restart').addEventListener('click',createLevel);$('next').addEventListener('click',()=>{level++;localStorage.setItem('arrows-level',String(level));createLevel()});
- window.addEventListener('resize',()=>{if(!animating)render()});createLevel();
- if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+
+  $('restart').addEventListener('click', () => createLevel(level));
+  $('next').addEventListener('click', () => createLevel(level + 1));
+  window.addEventListener('resize', () => { if (!animating) render(); }, {passive:true});
+  window.addEventListener('orientationchange', () => { if (!animating) requestAnimationFrame(render); }, {passive:true});
+
+  createLevel(level);
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+  }
 })();
 </script>
 </body>
